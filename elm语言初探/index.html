@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 4.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic|Noto Serif SC:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+  <link rel="stylesheet" href="/lib/pace/pace-theme-minimal.min.css">
+  <script src="/lib/pace/pace.min.js"></script>
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"weishijun.cc","root":"/","scheme":"Gemini","version":"7.7.2","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="翻譯自   http:&#x2F;&#x2F;elm-lang.org&#x2F; https:&#x2F;&#x2F;github.com&#x2F;elm-lang&#x2F;elm-compiler 前言介紹函數式編程 (Functional Programming)像是： Haskell, Scala, Closure 等等被開發出來在各式各樣的專案中使用。 但是，這些語言很少被拿來當成開發前端的工具。而Elm就是為前端人所設計的函數式編程語言 Elm 是一">
+<meta property="og:type" content="article">
+<meta property="og:title" content="elm语言初探">
+<meta property="og:url" content="http://weishijun.cc/elm%E8%AF%AD%E8%A8%80%E5%88%9D%E6%8E%A2/index.html">
+<meta property="og:site_name" content="俊的blog">
+<meta property="og:description" content="翻譯自   http:&#x2F;&#x2F;elm-lang.org&#x2F; https:&#x2F;&#x2F;github.com&#x2F;elm-lang&#x2F;elm-compiler 前言介紹函數式編程 (Functional Programming)像是： Haskell, Scala, Closure 等等被開發出來在各式各樣的專案中使用。 但是，這些語言很少被拿來當成開發前端的工具。而Elm就是為前端人所設計的函數式編程語言 Elm 是一">
+<meta property="og:image" content="http://weishijun.cc/elm%E8%AF%AD%E8%A8%80%E5%88%9D%E6%8E%A2/diagrams/signal-graph-summary.png">
+<meta property="og:image" content="https://cloud.githubusercontent.com/assets/11001914/15096410/be52f858-1528-11e6-846a-b2b53a98f41d.png">
+<meta property="og:image" content="https://cloud.githubusercontent.com/assets/11001914/15097373/a175170c-154b-11e6-9ad6-cdb3e009f855.png">
+<meta property="article:published_time" content="2018-01-12T07:53:55.000Z">
+<meta property="article:modified_time" content="2020-03-01T06:06:53.326Z">
+<meta property="article:author" content="weishijun">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://weishijun.cc/elm%E8%AF%AD%E8%A8%80%E5%88%9D%E6%8E%A2/diagrams/signal-graph-summary.png">
+
+<link rel="canonical" href="http://weishijun.cc/elm%E8%AF%AD%E8%A8%80%E5%88%9D%E6%8E%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>elm语言初探 | 俊的blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+    <a href="https://github.com/weishijun14" target="_blank" rel="noopener" class="github-corner" aria-label="View source on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></a><style>.github-corner:hover .octo-arm{animation:octocat-wave 560ms ease-in-out}@keyframes octocat-wave{0%,100%{transform:rotate(0)}20%,60%{transform:rotate(-25deg)}40%,80%{transform:rotate(10deg)}}@media (max-width:500px){.github-corner:hover .octo-arm{animation:none}.github-corner .octo-arm{animation:octocat-wave 560ms ease-in-out}}</style>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">俊的blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <p class="site-subtitle">心得，体会，感悟</p>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+  </ul>
+
+</nav>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-Hans">
+    <link itemprop="mainEntityOfPage" href="http://weishijun.cc/elm%E8%AF%AD%E8%A8%80%E5%88%9D%E6%8E%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="weishijun">
+      <meta itemprop="description" content="心得，体会，感悟">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="俊的blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          elm语言初探
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2018-01-12 15:53:55" itemprop="dateCreated datePublished" datetime="2018-01-12T15:53:55+08:00">2018-01-12</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-calendar-check-o"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2020-03-01 14:06:53" itemprop="dateModified" datetime="2020-03-01T14:06:53+08:00">2020-03-01</time>
+              </span>
+
+          
+            <span class="post-meta-item" title="阅读次数" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">阅读次数：</span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>翻譯自  </p>
+<p><a href="http://elm-lang.org/" target="_blank" rel="noopener">http://elm-lang.org/</a></p>
+<p><a href="https://github.com/elm-lang/elm-compiler" target="_blank" rel="noopener">https://github.com/elm-lang/elm-compiler</a></p>
+<h1 id="前言介紹"><a href="#前言介紹" class="headerlink" title="前言介紹"></a>前言介紹</h1><p>函數式編程 (Functional Programming)像是： Haskell, Scala, Closure 等等被開發出來在各式各樣的專案中使用。
+但是，這些語言很少被拿來當成開發前端的工具。而Elm就是為前端人所設計的函數式編程語言</p>
+<p>Elm 是一個强类型的函數式編程語言。最終會將它編譯成 JavaScript 以便於在瀏覽器上使用。</p>
+<a id="more"></a>
+
+<ul>
+<li><p>不會有執行階段錯誤 (Runtime Error)</p>
+</li>
+<li><p>Render 的速度快</p>
+</li>
+<li><p>語法簡潔，易於測試</p>
+</li>
+<li><p>完整的錯誤訊息</p>
+</li>
+<li><p>良好的設計架構 (Elm-Architecture)</p>
+</li>
+</ul>
+<p>它與 React 一樣使用了 Virtual DOM 的技術來提高效能並號稱比 React 快</p>
+<p>官方的<a href="http://elm-lang.org/examples" target="_blank" rel="noopener">Learn By example</a></p>
+<h1 id="目錄"><a href="#目錄" class="headerlink" title="目錄"></a>目錄</h1><p>2.<a href="#elm-工具">elm工具介紹</a></p>
+<p>3.<a href="#編譯器的-elm-syntax">設定你的Editor的syntax</a></p>
+<p>4.<a href="#開始學習elm">開始學習Elm</a></p>
+<p>5.<a href="#語言核心">語言核心</a></p>
+<p>6.<a href="#model-in-elm">Model in elm</a></p>
+<p>7.<a href="#the-elm-architecture">elm的核心架構</a></p>
+<p>8.<a href="#signals">Signals</a></p>
+<p>9.<a href="#interop">Interop</a></p>
+<hr>
+<h1 id="elm-工具"><a href="#elm-工具" class="headerlink" title="elm 工具"></a>elm 工具</h1><p>接著會開始引導您使用Elm 與 Elm 之一系列工具.</p>
+<p>我們假設您已安裝好Elm</p>
+<h4 id="工具"><a href="#工具" class="headerlink" title="工具"></a>工具</h4><p>Elm有一系列的工具可幫助您開發Elm程式，在您安裝好Elm時，他們會跟著安裝在您電腦上:</p>
+<ul>
+<li><p><a href="http://elm-lang.org/get-started#elm" target="_blank" rel="noopener">Elm</a></p>
+</li>
+<li><p><a href="http://elm-lang.org/get-started#elm-package" target="_blank" rel="noopener">elm-package</a></p>
+</li>
+<li><p><a href="http://elm-lang.org/get-started#elm-make" target="_blank" rel="noopener">elm-make</a></p>
+</li>
+<li><p><a href="http://elm-lang.org/get-started#elm-repl" target="_blank" rel="noopener">elm-repl</a></p>
+</li>
+</ul>
+<p>以下分別介紹，他們的功能</p>
+<h4 id="elm"><a href="#elm" class="headerlink" title="elm"></a>elm</h4><p>elm 為啟動其他工具的方式. 試著打開 terminal 並輸入<code>elm</code>試試.</p>
+<p>如果沒出現任何訊息，請先將以下路徑，加入環境变量</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">C:\Program Files (x86)\Elm Platform\0.16\bin</span><br></pre></td></tr></table></figure>
+
+<h4 id="elm-package"><a href="#elm-package" class="headerlink" title="elm-package"></a>elm-package</h4><p>elm-package 是一個套件管理工具, 讓你可以簡單的发布以及安裝套件到Elm Package Catalog.</p>
+<p>當你要開始一個新的Elm程式時, 執行:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">elm package install</span><br></pre></td></tr></table></figure>
+
+<p>這將會安裝<code>elm-core package</code> 以即將會創造一個 Elm project的檔案: <code>elm-package.json</code></p>
+<p> <code>elm-package.json</code> 用來寫一些關於套件相關的訊息，類似一個描述檔</p>
+<p>以下為一些常用的 commands:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">install: 安裝在 elm-package.json 所描述的套件</span><br><span class="line">publish: 將你的 library 發佈到  Elm Package Catalog</span><br><span class="line">bump: 根據 API changes 改變你的版本號碼</span><br><span class="line">diff: 查看兩個 API 的差異</span><br></pre></td></tr></table></figure>
+
+
+<h4 id="elm-make"><a href="#elm-make" class="headerlink" title="elm-make"></a>elm-make</h4><p>elm-make 是在命令列中執行，用來將elm程式編譯為HTML與Javascript. 一般都以此種方式來編譯elm的程式</p>
+<p>當我們在編譯時(例如將: Main.elm)編譯為  HTML 檔案 (index.html), 你將會寫出以下指令:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">elm make Main.elm --output&#x3D;index.html</span><br></pre></td></tr></table></figure>
+
+<p>可用的附加 flags:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">--warn: Prints warnings to improve code quality</span><br></pre></td></tr></table></figure>
+
+<h4 id="elm-repl"><a href="#elm-repl" class="headerlink" title="elm-repl"></a>elm-repl</h4><p>REPL 意思為 <code>read-eval-print-loop</code> 讓你可以執行一些簡單的 Elm 語句.  你可以從你的project引入一些程式碼到elm-repl進行測試 ， elm-repl 最終將會轉為javascript程式碼,所以在這之前你需要安裝好 node.js . 需要注意的是 elm-repl只提供 command line interface, browser 相關的 函式 將無法作用.</p>
+<p>常用的 commands:</p>
+<p>:help: 將會印出提示訊息
+:exit: 離開REPL</p>
+<h4 id="elm-reactor"><a href="#elm-reactor" class="headerlink" title="elm-reactor"></a>elm-reactor</h4><p>elm-reactor 為Elm的互動式開發工具. 使用 elm-reactor 你可以不用先編譯程式就可以執行 Elm programs，
+elm-reactor 還提供了 hot swapping 與 time travel debugging.(類似於redux開發時的功能)</p>
+<p>執行 elm reactor時 將會執行一個 web server 於 <code>0.0.0.0:8000</code> 你可以開啟你的 browser 選擇你想要執行的程式去執行，
+如果你想使用 elm-reactor 更進階的功能, 點擊左側在檔案名稱旁的 wrench ， 之後將會開啟檔案，並且在右方顯示一些功能欄位.</p>
+<p>常用的 flags:</p>
+<p>-a=<ADDRESS>: 改變 elm-reactor 執行時的ip位置</p>
+<p>由於預設的位置 0.0.0.0 不是所有瀏覽器都支援，但我們建議使用<code>-a=localhost</code></p>
+<p>-p=<PORT>: 改變 elm-reactor執行時所監聽的PORT</p>
+<p>以下為執行的例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">elm reactor -a&#x3D;localhost</span><br><span class="line">打開瀏覽器，輸入 localhost:8000.</span><br></pre></td></tr></table></figure>
+
+
+<p>以上即為elm tools的相關介紹，可以前往<a href="https://github.com/elm-lang查看" target="_blank" rel="noopener">https://github.com/elm-lang查看</a></p>
+<hr>
+<h1 id="編譯器的-elm-syntax"><a href="#編譯器的-elm-syntax" class="headerlink" title="編譯器的 elm syntax"></a>編譯器的 elm syntax</h1><p><a href="https://atom.io/packages/language-elm" target="_blank" rel="noopener">Atom</a></p>
+<p><a href="https://github.com/lepinay/elm-brackets" target="_blank" rel="noopener">Brackets</a></p>
+<p><a href="https://github.com/jcollard/elm-mode" target="_blank" rel="noopener">Emacs</a></p>
+<p><a href="https://github.com/rundis/elm-light" target="_blank" rel="noopener">Light Table</a></p>
+<p><a href="https://github.com/deadfoxygrandpa/Elm.tmLanguage" target="_blank" rel="noopener">Sublime Text</a></p>
+<p><a href="https://github.com/lambdatoast/elm.vim" target="_blank" rel="noopener">Vim</a></p>
+<p><a href="https://github.com/sbrink/vscode-elm" target="_blank" rel="noopener">VS Code</a></p>
+<hr>
+<h1 id="開始學習Elm"><a href="#開始學習Elm" class="headerlink" title="開始學習Elm"></a>開始學習Elm</h1><h1 id="語言核心"><a href="#語言核心" class="headerlink" title="語言核心"></a>語言核心</h1><p>  <a href="#values">Values</a></p>
+<p>  <a href="#functions">Functions</a></p>
+<p>  <a href="#if-expressions">If Expressions</a></p>
+<p>  <a href="#list">Lists</a></p>
+<p>  <a href="#tuples">Tuples</a></p>
+<p>  <a href="#records">Records</a></p>
+<h1 id="Values"><a href="#Values" class="headerlink" title="Values"></a>Values</h1><p>我們先來看一下，下面的例子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt; &quot;hello&quot;</span><br><span class="line">&quot;hello&quot;</span><br><span class="line"></span><br><span class="line">&gt; &quot;hello&quot; ++ &quot;world&quot;</span><br><span class="line">&quot;helloworld&quot;</span><br><span class="line"></span><br><span class="line">&gt; &quot;hello&quot; ++ &quot; world&quot;</span><br><span class="line">&quot;hello world&quot;</span><br></pre></td></tr></table></figure>
+<p>Elm 使用 (++) 來連接字串</p>
+<p>Elm的數學部分和其他語言類似</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">&gt; 2 + 3 * 4</span><br><span class="line">14</span><br><span class="line"></span><br><span class="line">&gt; (2 + 3) * 4</span><br><span class="line">20</span><br><span class="line"></span><br><span class="line">和JavaScript不同， Elm 具有floating point division (&#x2F;)(浮点除法)和 integer division (&#x2F;&#x2F;)(整形除法)，分別用來計算具有小數或只有整數部分</span><br><span class="line"></span><br><span class="line">&gt; 9 &#x2F; 2</span><br><span class="line">4.5</span><br><span class="line"></span><br><span class="line">&gt; 9 &#x2F;&#x2F; 2</span><br><span class="line">4</span><br></pre></td></tr></table></figure>
+<h1 id="Functions"><a href="#Functions" class="headerlink" title="Functions"></a>Functions</h1><p>讓我們寫一個 isNegative 的函数， 其具有參數可接受數字，並且確認他是否小於零，並返回 True 或 False.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt; isNegative n &#x3D; n &lt; 0</span><br><span class="line">&lt;function&gt;</span><br><span class="line"></span><br><span class="line">&gt; isNegative 4</span><br><span class="line">False</span><br><span class="line"></span><br><span class="line">&gt; isNegative -7</span><br><span class="line">True</span><br><span class="line"></span><br><span class="line">&gt; isNegative (-3 * -4)</span><br><span class="line">False</span><br></pre></td></tr></table></figure>
+<p>和JavaScript、Python、Java的函式寫法不同. 不使用逗号來分隔參數，而是使用空格。</p>
+<p>所以 <code>(add(3,4))</code> 將為 <code>(add 3 4)</code>
+此種作法將可避免一個函式的參數區塊具有許多逗号，當你習慣後，你會發現他看起來比較簡潔。 你可以使用 elm-html package 來理解。</p>
+<h1 id="If-Expressions"><a href="#If-Expressions" class="headerlink" title="If Expressions"></a>If Expressions</h1><p>使用條件表達式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&gt; if True then &quot;hello&quot; else &quot;world&quot;</span><br><span class="line">&quot;hello&quot;</span><br><span class="line"></span><br><span class="line">&gt; if False then &quot;hello&quot; else &quot;world&quot;</span><br><span class="line">&quot;world&quot;</span><br><span class="line"> if then else 用來分隔條件，我們不用再加上任何&#96;&#123;&#125;&#96;符號</span><br><span class="line"></span><br><span class="line">需要注意的一點是:Elm 的numbers、strings、lists 不可用來進行類似 boolean 的比較</span><br><span class="line"></span><br><span class="line">接著下們的表達式可以用來區別，是否值大於9000</span><br><span class="line"></span><br><span class="line">&gt; over9000 powerLevel &#x3D; \</span><br><span class="line">|   if powerLevel &gt; 9000 then &quot;It&#39;s over 9000!!!&quot; else &quot;meh&quot;</span><br><span class="line">&lt;function&gt;</span><br><span class="line"></span><br><span class="line">&gt; over9000 42</span><br><span class="line">&quot;meh&quot;</span><br><span class="line"></span><br><span class="line">&gt; over9000 100000</span><br><span class="line">&quot;It&#39;s over 9000!!!&quot;</span><br></pre></td></tr></table></figure>
+<p>使用backslash <code>\</code> 於 REPL ˋ中，可以讓我們進行斷行，讓function的主要部分寫在名字之後的下一行，可以讓我們更容易閱讀, 
+建議在所有functions 和 values 中都用此種寫法去寫。</p>
+<h1 id="List"><a href="#List" class="headerlink" title="List"></a>List</h1><p>Lists 是在Elm中最常見的資料結構. 類似於JavaScript 或 Java中的数组結構,保存一系列的相關同型別資料。</p>
+<p>可以查看有關List可以使用的function <a href="http://package.elm-lang.org/packages/elm-lang/core/3.0.0/List" target="_blank" rel="noopener">List</a></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">&gt; names &#x3D; [ &quot;Alice&quot;, &quot;Bob&quot;, &quot;Chuck&quot; ]</span><br><span class="line">[&quot;Alice&quot;,&quot;Bob&quot;,&quot;Chuck&quot;]</span><br><span class="line"></span><br><span class="line">&gt; List.isEmpty names</span><br><span class="line">False</span><br><span class="line"></span><br><span class="line">&gt; List.length names</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">&gt; List.reverse names</span><br><span class="line">[&quot;Chuck&quot;,&quot;Bob&quot;,&quot;Alice&quot;]</span><br><span class="line"></span><br><span class="line">&gt; numbers &#x3D; [1,4,3,2]</span><br><span class="line">[1,4,3,2]</span><br><span class="line"></span><br><span class="line">&gt; List.sort numbers</span><br><span class="line">[1,2,3,4]</span><br><span class="line"></span><br><span class="line">&gt; double n &#x3D; n * 2</span><br><span class="line">&lt;function&gt;</span><br><span class="line"></span><br><span class="line">&gt; List.map double numbers</span><br><span class="line">[2,8,6,4]</span><br><span class="line">再次強調，List中的每個內容都是相同型別</span><br></pre></td></tr></table></figure>
+<p>對比一些物件導向語言, Elm 的 functions 和 data 是分開存在的。為了具有模組化 ， Elm 使用了許多模組， 當我們使用<code>List.isEmpty</code> 
+我們是從List module 中去調用該方法，List module 和lists具有很大的關係。</p>
+<h1 id="Tuples"><a href="#Tuples" class="headerlink" title="Tuples"></a>Tuples</h1><p>Tuples 是在Elm中，另外一種很有用的資料結構. tuple 裡面包含一系列的固定值，可以有不同資料型別.當你要從function返回不同資料時可用逗号分隔，
+下面的例子中，這個 function 會取得 name 並返回一個 message 給 user :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&gt; import String</span><br><span class="line"></span><br><span class="line">&gt; goodName name &#x3D; \</span><br><span class="line">|   if String.length name &lt;&#x3D; 20 then \</span><br><span class="line">|     (True, &quot;name accepted!&quot;) \</span><br><span class="line">|   else \</span><br><span class="line">|     (False, &quot;name was too long; please limit it to 20 characters&quot;)</span><br><span class="line"></span><br><span class="line">&gt; goodName &quot;Tom&quot;</span><br><span class="line">(True, &quot;name accepted!&quot;)</span><br></pre></td></tr></table></figure>
+
+<p>但是，當你的程式開始變得複雜時，我們會建議使用records來取代tuples。</p>
+<h1 id="Records"><a href="#Records" class="headerlink" title="Records"></a>Records</h1><p> record 是具有 key-value pairs 的資料結構, 類似於 JavaScript 或 Python 中的对象(Object)，你將會發現他在Eml中很好用，</p>
+<p> 下面有些範例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt; point &#x3D; &#123; x &#x3D; 3, y &#x3D; 4 &#125;</span><br><span class="line">&#123; x &#x3D; 3, y &#x3D; 4 &#125;</span><br><span class="line"></span><br><span class="line">&gt; point.x</span><br><span class="line">3</span><br><span class="line"></span><br><span class="line">&gt; bill &#x3D; &#123; name &#x3D; &quot;Gates&quot;, age &#x3D; 57 &#125;</span><br><span class="line">&#123; age &#x3D; 57, name &#x3D; &quot;Gates&quot; &#125;</span><br><span class="line"></span><br><span class="line">&gt; bill.name</span><br><span class="line">&quot;Gates&quot;</span><br></pre></td></tr></table></figure>
+<p> Elm 把 .x (x 為 key 值) 也做成了一個函數，所以我們不只可以用bill.name 也可以用 .name bill 來取得同樣的值。
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"> &gt; .name bill</span><br><span class="line">&quot;Gates&quot;</span><br><span class="line"></span><br><span class="line">&gt; List.map .name [bill,bill,bill]</span><br><span class="line">[&quot;Gates&quot;,&quot;Gates&quot;,&quot;Gates&quot;]</span><br></pre></td></tr></table></figure>
+當 functions 和 records 結合時, 你可以使用以下寫法，更為簡潔</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&gt; under70 &#123;age&#125; &#x3D; age &lt; 70</span><br><span class="line">&lt;function&gt; </span><br><span class="line"></span><br><span class="line">&gt; under70 bill</span><br><span class="line">True</span><br><span class="line"></span><br><span class="line">&gt; under70 &#123; species &#x3D; &quot;Triceratops&quot;, age &#x3D; 68000000 &#125;</span><br><span class="line">False</span><br></pre></td></tr></table></figure>
+
+
+<p>從範例中我們可以傳遞任何 record 進去， 當他有一個  number 型態的age field </p>
+<p>It is often useful to update the values in a record.</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&gt; &#123; bill | name &#x3D; &quot;Nye&quot; &#125;</span><br><span class="line">&#123; age &#x3D; 57, name &#x3D; &quot;Nye&quot; &#125;</span><br><span class="line"></span><br><span class="line">&gt; &#123; bill | age &#x3D; 22 &#125;</span><br><span class="line">&#123; age &#x3D; 22, name &#x3D; &quot;Gates&quot; &#125;</span><br></pre></td></tr></table></figure>
+<p>當你更新資料時，Elm不會覆蓋舊資料，而是新建一筆新的record，當你更新十筆資料的其中一筆時，
+Elm會用有效率的方式連同其他九筆一同更新。</p>
+<h4 id="比較-Records-與-Objects"><a href="#比較-Records-與-Objects" class="headerlink" title="比較 Records 與 Objects"></a>比較 Records 與 Objects</h4><p>Records 在 Elm 類似於 JavaScript的物件(Object), 但有一些關鍵點不同。 以下為records的不同之處:</p>
+<ul>
+<li><p>你不可以使用不存在的field.</p>
+</li>
+<li><p>field不可為 undefined 或是 null.</p>
+</li>
+<li><p>你不可以使用 this 或 self 等關鍵字來創造遞迴的 records </p>
+</li>
+</ul>
+<p>Elm 鼓勵你把邏輯和資料分開，因為Elm想把這個在一般物件導向程式中所會遇到的問題避免掉。</p>
+<p>Records 也支援 <a href="https://en.wikipedia.org/wiki/Structural_type_system" target="_blank" rel="noopener">structural typing</a></p>
+<p>這個意思為 Elm 在必要的 fields 存在時可以使用在任何情況. 這給我們很大的彈性</p>
+<h1 id="Model-in-elm"><a href="#Model-in-elm" class="headerlink" title="Model in elm"></a>Model in elm</h1><p>這一章節將帶領你，處理複雜的資料時可以有良好的方式去處理，也可以方便未來去重構，以下將從 “contracts”開始講起。</p>
+<h2 id="Contracts"><a href="#Contracts" class="headerlink" title="Contracts"></a>Contracts</h2><p>我們在定義個程式的整體模型時，其中的資料型態占了很重要的部分，想像他們是一份會被編譯器檢查的合約，並且寫著類似“我只接受字串” 
+確保不會有其他的資料型態進入。這在 Elm 中是避免執行時期的錯誤是很重要的因素。</p>
+<p>注意: 在elm中“types” 意思為 “types as they appear in Elm”.這與 Java 中的type有很大的區別! 許多程序員只有在 Java、JavaScript or Python or Ruby使用type，有時他們覺得type是很不必要的，因為使用的type最後編譯完，還是會得到有關type相關的錯誤訊息
+這是什麼原因?</p>
+<p>我們寫下的 contracts 為“type annotations” 也是我們寫出我們資料長的什麼樣子的地方。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">fortyTwo : Int</span><br><span class="line">fortyTwo &#x3D;</span><br><span class="line">  42</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">names : List String</span><br><span class="line">names &#x3D;</span><br><span class="line">  [ &quot;Alice&quot;, &quot;Bob&quot;, &quot;Chuck&quot; ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">book : &#123; title: String, author: String, pages: Int &#125;</span><br><span class="line">book &#x3D;</span><br><span class="line">  &#123; title &#x3D; &quot;Demian&quot;, author &#x3D; &quot;Hesse&quot;, pages &#x3D; 176 &#125;</span><br></pre></td></tr></table></figure>
+<p>這裡我們寫了一些常會使用到的資料型別， fortyTwo 為一個 integer, names是一個list of strings,而 book 是一個 record with certain fields. </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">import String</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">longestName : List String -&gt; Int</span><br><span class="line">longestName names &#x3D;</span><br><span class="line">  List.maximum (List.map String.length names)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">isLong : &#123; record | pages : Int &#125; -&gt; Bool</span><br><span class="line">isLong book &#x3D;</span><br><span class="line">  book.pages &gt; 400</span><br></pre></td></tr></table></figure>
+
+<p>在上面這個範例 longestName ,我們要求輸入的值為一個 list of strings. 假如有人想要輸入一個 list of integers 或是 books, 其中的 String.length function將會中斷,因為我們定義了 contract。我們還指定了 longestName function 將要返回一個 Int ，所以當我們接他的返回值用在其他地方時，可以保證他會是一個數字</p>
+<p>其中的isLong example 做的是同樣的事情，他要求一個 record with a field 名稱為 pages 型態為 integers.當其他人輸入任何資料時，都需要一個 pages field!</p>
+<p>上面兩個範例中，我們寫了 contracts 說明 “我需要你輸入某種型態的值, 而我也會返回給你同型態的值.” 這將是 Elm 擺脫執行時期發生錯誤的關鍵， 只要我們遵守條件，我們永遠可以知道該function需要什麼型態的值，以及將會返回什麼型態的值。</p>
+<h2 id="Enumerations-列舉"><a href="#Enumerations-列舉" class="headerlink" title="Enumerations(列舉)"></a>Enumerations(列舉)</h2><p>創造一個自訂的資料型態，並列舉他可能的值，想像我們建造一個 todo list 並且想要再建造一個 filter 來過濾哪些task是看的見的</p>
+<p>我們可以如下定義三種顯示方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type Visibility &#x3D; All | Active | Completed</span><br></pre></td></tr></table></figure>
+
+<p>如同上面定義的方式，未來我們要傳遞資料的 type 為 Visibility 時，可能的值只能上面三種的其中一種。</p>
+<p>我們使用case-expressions來讓我們在接收到不同的值時做不同的事，和JavaScript 中的switch-statements類似,但 case-expression 不同的是，你不需要在每個case的結尾寫上break</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">toString : Visibility -&gt; String</span><br><span class="line">toString visibility &#x3D;</span><br><span class="line">    case visibility of</span><br><span class="line">      All -&gt;</span><br><span class="line">          &quot;All&quot;</span><br><span class="line"></span><br><span class="line">      Active -&gt;</span><br><span class="line">          &quot;Active&quot;</span><br><span class="line"></span><br><span class="line">      Completed -&gt;</span><br><span class="line">          &quot;Completed&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- toString All &#x3D;&#x3D; &quot;All&quot;</span><br><span class="line">-- toString Active &#x3D;&#x3D; &quot;Active&quot;</span><br><span class="line">-- toString Completed &#x3D;&#x3D; &quot;Completed&quot;</span><br></pre></td></tr></table></figure>
+<p>這個 case-expression 意思為,如果傳入的 visibility為 All 則回傳”ALL” ，以此類推。</p>
+<h2 id="State-Machines-狀態機"><a href="#State-Machines-狀態機" class="headerlink" title="State Machines(狀態機)"></a>State Machines(狀態機)</h2><p>接著我們想要顯示一個使用者是否有登入， 我們可以建造一個小型的state machine 讓使用者可以在匿名以及登入後的使用者名稱做切換。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type User &#x3D; Anonymous | LoggedIn String</span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是， LoggedIn 中的值有額外的資訊!意思是當type為LoggedIn 將可接收到一個字串的值. 我們可以
+在Anonymous或LoggedIn 使用case-expressions判斷，之後再用 LoggedIn 字串的值，產生不同圖片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">userPhoto : User -&gt; String</span><br><span class="line">userPhoto user &#x3D;</span><br><span class="line">    case user of</span><br><span class="line">      Anonymous -&gt;</span><br><span class="line">          &quot;anon.png&quot;</span><br><span class="line"></span><br><span class="line">      LoggedIn name -&gt;</span><br><span class="line">          &quot;users&#x2F;&quot; ++ name ++ &quot;&#x2F;photo.png&quot;</span><br></pre></td></tr></table></figure>
+
+<p>假如他們沒有登入，我們產生”anon.png”, 假如他們已登入，即產生對應的圖片. 假設我們現在有數個user，並且想要一次產生他們的圖片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">activeUsers : List User</span><br><span class="line">activeUsers &#x3D;</span><br><span class="line">    [ Anonymous</span><br><span class="line">    , LoggedIn &quot;Tom&quot;</span><br><span class="line">    , LoggedIn &quot;Steve&quot;</span><br><span class="line">    , Anonymous</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p>我們可用map的方式，一次產生不同圖片</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">photos &#x3D;</span><br><span class="line">    List.map userPhoto activeUsers</span><br><span class="line"></span><br><span class="line">-- photos &#x3D;</span><br><span class="line">--     [ &quot;anon.png&quot;</span><br><span class="line">--     , &quot;users&#x2F;Tom&#x2F;photo.png&quot;</span><br><span class="line">--     , &quot;users&#x2F;Steve&#x2F;photo.png&quot;</span><br><span class="line">--     , &quot;anon.png&quot;</span><br><span class="line">--     ]</span><br></pre></td></tr></table></figure>
+
+<p>所有的使用者如此一來都有了對應的圖，這是一個簡單的  state machine 範例， 但你可以想像，假設使用者有五種不同的狀態，我們可以精確的定義好Model，讓錯誤的發生率降低。</p>
+<h2 id="Tagged-Unions"><a href="#Tagged-Unions" class="headerlink" title="Tagged Unions"></a>Tagged Unions</h2><p>接著我們試著把一系列不同的資料型態以緊密的方式結合在一起。或稱(ADTs)</p>
+<p>假設我們在主控台上創造一系列的小工具. 其中一個為點陣圖，另一個為 log data，最後一個為時間圖， Type unions 讓他們可以簡單的結合在一起
+:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">type Widget</span><br><span class="line">    &#x3D; ScatterPlot (List (Int, Int))</span><br><span class="line">    | LogData (List String)</span><br><span class="line">    | TimePlot (List (Time, Int))</span><br></pre></td></tr></table></figure>
+<p>你可以想像是把三種不同的type放一起. 每個type有一個標籤 ，像是 ScatterPlot 及 LogData.這麼做可以區隔他們. 
+接著我們將輸出 widget 如同以下範例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">view : Widget -&gt; Element</span><br><span class="line">view widget &#x3D;</span><br><span class="line">    case widget of</span><br><span class="line">      ScatterPlot points -&gt;</span><br><span class="line">          viewScatterPlot points</span><br><span class="line"></span><br><span class="line">      LogData logs -&gt;</span><br><span class="line">          flow down (map viewLog logs)</span><br><span class="line"></span><br><span class="line">      TimePlot occurrences -&gt;</span><br><span class="line">          viewTimePlot occurrences</span><br></pre></td></tr></table></figure>
+<p>根據不同種類的widget， 我們將會輸出不同的東西， 如果我們想要進一歩讓 time plots 展示為一個 logarithmic scale(
+對數刻度). 我們可以將 Widget 改為如下</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">type Scale &#x3D; Normal | Logarithmic</span><br><span class="line"></span><br><span class="line">type Widget</span><br><span class="line">    &#x3D; ScatterPlot (List (Int, Int))</span><br><span class="line">    | LogData (List String)</span><br><span class="line">    | TimePlot Scale (List (Time, Int))</span><br></pre></td></tr></table></figure>
+
+<p>現在 TimePlot 有了兩個部分的 data，而每個 tag 可以有不同的 types.</p>
+<h2 id="Banishing-NULL"><a href="#Banishing-NULL" class="headerlink" title="Banishing NULL"></a>Banishing NULL</h2><p>許多語言都有 null 的型態. 每次你覺得你的資料是一個字串，但其實你擁有的只是一個 null， 你需要檢查嗎? 這是否會對你的程式帶來重大影響?下面將會對這類問題進行討論。</p>
+<p>Elm 使用了一個 type 叫做 Maybe，來避免了這個問題，你可以想像他把null明確的寫出，所以我們可以知道何時需要去處理他。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type Maybe a &#x3D; Just a | Nothing</span><br></pre></td></tr></table></figure>
+
+<p>這個type有一個引數 a ，我們可以對他引用任何想要的值.我們可以使用像是 (Maybe Int) 他將是一個整數或是Nothing。例如， 我們想要把字串解析成月份</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">String.toInt : String -&gt; Result String Int</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">toMonth : String -&gt; Maybe Int</span><br><span class="line">toMonth rawString &#x3D;</span><br><span class="line">    case String.toInt rawString of</span><br><span class="line">      Err message -&gt;</span><br><span class="line">          Nothing</span><br><span class="line"></span><br><span class="line">      Ok n -&gt;</span><br><span class="line">          if n &gt; 0 &amp;&amp; n &lt;&#x3D; 12 then Just n else Nothing</span><br></pre></td></tr></table></figure>
+
+<p>這個 toMonth的 contract 明確的指出他將會返回一個整數，否則將不返回任何東西! 所以你將不用在煩惱會有null的產生。</p>
+<h2 id="Recursive-Data-Structures-遞迴性的資料結構"><a href="#Recursive-Data-Structures-遞迴性的資料結構" class="headerlink" title="Recursive Data Structures(遞迴性的資料結構)"></a>Recursive Data Structures(遞迴性的資料結構)</h2><p>假如你曾經在 C 或 Java中使用過  linked list 你將會認為在 Elm 中使用是很簡單的.下面的是一個list的type. list 的最前面只能接受:
+empty或是something followed by a list.我們可將這一個非正式的定義轉為一個 type:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type List a &#x3D; Empty | Node a (List a)</span><br></pre></td></tr></table></figure>
+<p>所以我們創造一個 type 名為 List.  list 可以是 empty 或是擁有一個 element (the head of the list) 以及 “the rest of the list” ( the tail of the list).</p>
+<p>List 接受一個 type 當做 argument, 所以我們可以創造 (List Int) 或是 (List String) 以及其他， 如同以下範例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Empty</span><br><span class="line">Node 1 Empty</span><br><span class="line">Node 3 (Node 2 (Node 1 Empty))</span><br></pre></td></tr></table></figure>
+
+<p>他們都擁有同樣的 type，所以可以被使用在同個地方。當我們在做 pattern match時 可以定義於 case所要做的事。 假設我們想計算List中所有數字的總和， 下面範例中的 function 定義了一些可能發生的情境。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sum : List Int -&gt; Int</span><br><span class="line">sum xs &#x3D;</span><br><span class="line">    case xs of</span><br><span class="line">      Empty -&gt;</span><br><span class="line">          0</span><br><span class="line"></span><br><span class="line">      Node first rest -&gt;</span><br><span class="line">          first + sum rest</span><br></pre></td></tr></table></figure>
+<p>假設我們得到一個 Empty value, 總和將為 0。 假設我們有一個 Node ，並且將元素一個個加到總合中，將會產生如<code>(sum (Node 1 (Node 2 (Node 3 Empty))))</code> 的情況，和下面範例相同:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">sum (Node 1 (Node 2 (Node 3 Empty)))</span><br><span class="line">1 + sum (Node 2 (Node 3 Empty))</span><br><span class="line">1 + (2 + sum (Node 3 Empty))</span><br><span class="line">1 + (2 + (3 + sum Empty))</span><br><span class="line">1 + (2 + (3 + 0))</span><br><span class="line">1 + (2 + 3)</span><br><span class="line">1 + 5</span><br><span class="line">6</span><br></pre></td></tr></table></figure>
+
+<p>接著我們可以試著產生二元樹</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">type Tree a &#x3D; Empty | Node a (Tree a) (Tree a)</span><br></pre></td></tr></table></figure>
+<p>A tree 可能為 empty或是一個 node 擁有一個 value 與 two children. 可看下面的範例，來學習更多關於 union types 的資料結構</p>
+<p><a href="http://elm-lang.org/examples/binary-tree" target="_blank" rel="noopener">http://elm-lang.org/examples/binary-tree</a></p>
+<blockquote>
+<p>想像我們在 Java 做出這個範例.我們可能會使用 super class 和 兩個 sub classes 來定義二元樹。 想像我們是使用 JavaScript.
+一開始看起來不會很困難，但當我們在重構時，你將會遇到許多隱藏的錯誤。</p>
+</blockquote>
+<p>我們也可以 model 一個程式語言為 data ，在這個情況下,他將只處理有關 Boolean algebra:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">type Boolean</span><br><span class="line">    &#x3D; T</span><br><span class="line">    | F</span><br><span class="line">    | Not Boolean</span><br><span class="line">    | Or  Boolean Boolean</span><br><span class="line">    | And Boolean Boolean</span><br><span class="line"></span><br><span class="line">true &#x3D; Or T F</span><br><span class="line">false &#x3D; And T (Not T)</span><br></pre></td></tr></table></figure>
+<p>當我們 model好可能的值之後，我們可以定義 functions 例如eval 用來執行 Boolean 讓其為 True 或 False，可查看下面的連結範例</p>
+<p><a href="http://elm-lang.org/examples/boolean-expressions" target="_blank" rel="noopener">http://elm-lang.org/examples/boolean-expressions</a></p>
+<h1 id="The-Elm-Architecture"><a href="#The-Elm-Architecture" class="headerlink" title="The Elm Architecture"></a>The Elm Architecture</h1><p>這個教程 “The Elm Architecture” 你將會看到許多跟 <a href="http://elm-lang.org/" target="_blank" rel="noopener">Elm</a> 相關的程式, 包含 <a href="https://github.com/evancz/elm-todomvc" target="_blank" rel="noopener">TodoMVC</a> 、 <a href="https://github.com/rtfeldman/dreamwriter#dreamwriter" target="_blank" rel="noopener">dreamwriter</a>以及正式上線的  <a href="https://www.noredink.com/" target="_blank" rel="noopener">NoRedInk</a> 、 <a href="https://www.circuithub.com/" target="_blank" rel="noopener">CircuitHub</a>. 了解這個設計模式將對你在 Elm 中的程式或任何其他編程都很有幫助。</p>
+<p> Elm 架構中的設計模式讓你的元件可以有無限嵌套. 對於模組化、 程式碼復用、 測試很有幫助，最終讓你可以簡單的設計出一個複雜但模組化的web程式。 下面將有八個範例</p>
+<ol>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/1.html" target="_blank" rel="noopener">Counter</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/2.html" target="_blank" rel="noopener">Pair of counters</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/3.html" target="_blank" rel="noopener">List of counters</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/4.html" target="_blank" rel="noopener">List of counters (variation)</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/5.html" target="_blank" rel="noopener">GIF fetcher</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/6.html" target="_blank" rel="noopener">Pair of GIF fetchers</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/7.html" target="_blank" rel="noopener">List of GIF fetchers</a></li>
+<li><a href="http://evancz.github.io/elm-architecture-tutorial/examples/8.html" target="_blank" rel="noopener">Pair of animating squares</a></li>
+</ol>
+<p><strong>注意</strong>: 要運行這些範例需先, <a href="http://elm-lang.org/install" target="_blank" rel="noopener">安裝 Elm</a> 以及 fork this repo. 每個範例都會教導你，該如何去運行它</p>
+<h2 id="Elm中的基本設計模式概念"><a href="#Elm中的基本設計模式概念" class="headerlink" title="Elm中的基本設計模式概念"></a>Elm中的基本設計模式概念</h2><p>每個 Elm program 都有如下三個區塊架構:</p>
+<ul>
+<li>model</li>
+<li>update</li>
+<li>view</li>
+</ul>
+<blockquote>
+<p>如果你還沒學習過elm可以先參考 <a href="http://elm-lang.org/docs" target="_blank" rel="noopener">language docs</a> 與<a href="http://elm-lang.org/docs#complete-guide" target="_blank" rel="noopener">the complete guide</a></p>
+</blockquote>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- MODEL</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> = &#123; ... &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- UPDATE</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="type">Action</span> = <span class="type">Reset</span> | ...</span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">update</span> action model =</span><br><span class="line">  <span class="keyword">case</span> action <span class="keyword">of</span></span><br><span class="line">    <span class="type">Reset</span> -&gt; ...</span><br><span class="line">    ...</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- VIEW</span></span><br><span class="line"></span><br><span class="line"><span class="title">view</span> : <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">view</span> =</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+
+<p>這個教程都是由上面範例的這個設計模式 與一些小變化及插件所組成的。</p>
+<h2 id="Example-1-A-Counter"><a href="#Example-1-A-Counter" class="headerlink" title="Example 1: A Counter"></a>Example 1: A Counter</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/1.html" target="_blank" rel="noopener">demo</a> / <a href="examples/1/">see code</a></strong></p>
+<p>第一個範例是一個簡單的計數器，可以進行增加與減少</p>
+<p><a href="examples/1/Counter.elm">The code</a> 由一個很簡單的 model所組成， 我們要做的只是追蹤一個會改變的數字</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> = <span class="type">Int</span></span><br></pre></td></tr></table></figure>
+
+<p>當 model 更新時， 我們定義一系列 actions, 以及一個 <code>update</code> function用來接收 actions並執行相應的case</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span> = <span class="type">Increment</span> | <span class="type">Decrement</span></span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">update</span> action model =</span><br><span class="line">  <span class="keyword">case</span> action <span class="keyword">of</span></span><br><span class="line">    <span class="type">Increment</span> -&gt; model + <span class="number">1</span></span><br><span class="line">    <span class="type">Decrement</span> -&gt; model - <span class="number">1</span></span><br></pre></td></tr></table></figure>
+
+<p>需要注意的是 <code>Action</code> <a href="http://elm-lang.org/learn/Union-Types.elm" target="_blank" rel="noopener">union type</a> 並沒有做任何事， 他只是描述了一個動作的型態. 假設有人想讓計數器在點擊某個按鈕時可以讓數字變double, 這將需要增加一個新的 <code>Action</code>類型，這可以保持我們的Model簡潔，並且他人可以清楚的知道他可以對這個model進行何種操作</p>
+<p> <code>view</code> our <code>Model</code>.我們使用 <a href="http://elm-lang.org/blog/Blazing-Fast-Html.elm" target="_blank" rel="noopener">elm-html</a>來創造一個 HTML，其它包含一個 div 裡面裝有一個 decrement button以及a div showing the current count與 an increment button.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">view</span> : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">view</span> address model =</span><br><span class="line">  div []</span><br><span class="line">    [ button [ onClick address <span class="type">Decrement</span> ] [ text <span class="string">"-"</span> ]</span><br><span class="line">    , div [ countStyle ] [ text (toString model) ]</span><br><span class="line">    , button [ onClick address <span class="type">Increment</span> ] [ text <span class="string">"+"</span> ]</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line"><span class="title">countStyle</span> : <span class="type">Attribute</span></span><br><span class="line"><span class="title">countStyle</span> =</span><br><span class="line">  ...</span><br></pre></td></tr></table></figure>
+<p>在 <code>view</code> 這個函式中的 <code>Address</code>我們將會在下一節提到! 在這裡我們使用了 <code>Model</code> 並產生一些 <code>Html</code>. 我們並沒有手動去更動DOM，
+這讓這個 library <a href="http://elm-lang.org/blog/Blazing-Fast-Html.elm" target="_blank" rel="noopener">有了更好的自由度及優化</a> 並且讓畫面 rendering的速度更快。 以及 <code>view</code>是一個function ，我們可使用 Elm中的 module system、 test frameworks與其他 libraries 來創造 views.</p>
+<p>這種設計模式是Elm中的基本架構，接著的範例中都是以此種架構去進行 <code>Model</code>, <code>update</code>, <code>view</code>.</p>
+<h2 id="Starting-the-Program"><a href="#Starting-the-Program" class="headerlink" title="Starting the Program"></a>Starting the Program</h2><p>在elm程式中，都會有一個主體的部分，程式從此開始進行，如同以下的範例均是以 <code>Main.elm</code>為主體</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Counter <span class="keyword">exposing</span> (update, view)</span><br><span class="line"><span class="keyword">import</span> StartApp.Simple <span class="keyword">exposing</span> (start)</span><br><span class="line"></span><br><span class="line"><span class="title">main</span> =</span><br><span class="line">  start &#123; model = <span class="number">0</span>, update = update, view = view &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我們使用了 <a href="https://github.com/evancz/start-app" target="_blank" rel="noopener"><code>StartApp</code></a> 來建造初始的 model 、 update 與 view functions. 這即是Elm’s <a href="http://elm-lang.org/learn/Using-Signals.elm" target="_blank" rel="noopener">signals</a>的概念，所以你暫時還不用了解signals的概念。</p>
+<p>其中的關鍵點在於 <code>Address</code>。 每個 event handler 於我們的 <code>view</code> function 之中會回傳一個特別的  address. It just sends chunks of data along.而 <code>StartApp</code> package 監測每個來自 address 的訊息，並轉送到 <code>update</code> function. 接著 model 被更新 ，然後<a href="http://elm-lang.org/blog/Blazing-Fast-Html.elm" target="_blank" rel="noopener">elm-html</a> 把view更新</p>
+<p> Elm 程式中的單向資料流如同下圖的概念</p>
+<p><img src="diagrams/signal-graph-summary.png" alt="Signal Graph Summary"></p>
+<p>圖片中的藍色部分為 Elm 程式的核心，此即為我們先前提到的 model/update/view 概念。 未來在寫Elm程式時，即可以此種架構去規劃，讓邏輯的部分完全與View分開。</p>
+<h2 id="Example-2-A-Pair-of-Counters"><a href="#Example-2-A-Pair-of-Counters" class="headerlink" title="Example 2: A Pair of Counters"></a>Example 2: A Pair of Counters</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/2.html" target="_blank" rel="noopener">demo</a> / <a href="examples/2/">see code</a></strong></p>
+<p>在範例1中，我們建立了一個簡單的計數器。但我們該如何擴展架構，當我們需要兩個計數器時呢? </p>
+<p> Elm架構中的優點是  <strong>我們可以不更動程式碼</strong>來達成擴展架構。 當我們在上個範例創造 <code>Counter</code> 模組時,他把細節封裝起來，所以我們可以把他用在別處。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> Counter (<span class="type">Model</span>, init, <span class="type">Action</span>, update, view) <span class="keyword">where</span></span><br><span class="line"></span><br><span class="line">type Model</span><br><span class="line"></span><br><span class="line">init : Int -&gt; Model</span><br><span class="line"></span><br><span class="line">type Action</span><br><span class="line"></span><br><span class="line">update : Action -&gt; Model -&gt; Model</span><br><span class="line"></span><br><span class="line">view : Signal.Address Action -&gt; Model -&gt; Html</span><br></pre></td></tr></table></figure>
+
+<p>創造模組化的code 是很抽象的。我們把一些 functionality 的部分提供出來並隱藏一些實做細節。在 <code>Counter</code> module外面，我們只看得到
+一些基本的關於 <code>Model</code>, <code>init</code>, <code>Action</code>, <code>update</code>, 與 <code>view</code>。我們並不在乎他們是如何被實做的。 事實上,這是不可能被知道的
+. 意思是當我們選擇不把他公開時，其他人無法知道我們的實做細節。</p>
+<p>所以我們可以複用 <code>Counter</code> module，並用他來創造 <code>CounterPair</code>，和先前一樣，我們先從 <code>Model</code>開始:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> =</span><br><span class="line">    &#123; topCounter : <span class="type">Counter</span>.<span class="type">Model</span></span><br><span class="line">    , bottomCounter : <span class="type">Counter</span>.<span class="type">Model</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="title">init</span> : <span class="type">Int</span> -&gt; <span class="type">Int</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">init</span> top bottom =</span><br><span class="line">    &#123; topCounter = <span class="type">Counter</span>.init top</span><br><span class="line">    , bottomCounter = <span class="type">Counter</span>.init bottom</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>這個 <code>Model</code> 擁有兩個區塊分別為顯示在螢幕的top和bottom。用來完整描述我們應用程式中的 state。 以及一個 <code>init</code> function 
+讓我們在未來更新<code>Model</code>所用。 </p>
+<p>接著我們將定義 <code>Actions</code> ，將包含: reset all counters、 update the top counter與 update the bottom counter.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span></span><br><span class="line">    = <span class="type">Reset</span></span><br><span class="line">    | <span class="type">Top</span> <span class="type">Counter</span>.<span class="type">Action</span></span><br><span class="line">    | <span class="type">Bottom</span> <span class="type">Counter</span>.<span class="type">Action</span></span><br></pre></td></tr></table></figure>
+
+<p>注意到的是，上面的 <a href="http://elm-lang.org/learn/Union-Types.elm" target="_blank" rel="noopener">union type</a> 指向 <code>Counter.Action</code> type,但我們並不知道這些 actions，當我們創造 <code>update</code> function時， 我們才將
+這些 <code>Counter.Actions</code> 指向正確的地方:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">update</span> action model =</span><br><span class="line">  <span class="keyword">case</span> action <span class="keyword">of</span></span><br><span class="line">    <span class="type">Reset</span> -&gt; init <span class="number">0</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="type">Top</span> act -&gt;</span><br><span class="line">      &#123; model |</span><br><span class="line">          topCounter = <span class="type">Counter</span>.update act model.topCounter</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">Bottom</span> act -&gt;</span><br><span class="line">      &#123; model |</span><br><span class="line">          bottomCounter = <span class="type">Counter</span>.update act model.bottomCounter</span><br><span class="line">      &#125;</span><br></pre></td></tr></table></figure>
+
+<p>最後，我們建造一個 <code>view</code> function用來在畫面上顯示兩個 counters 與一個 reset button.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">view</span> : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">view</span> address model =</span><br><span class="line">  div []</span><br><span class="line">    [ <span class="type">Counter</span>.view (<span class="type">Signal</span>.forwardTo address <span class="type">Top</span>) model.topCounter</span><br><span class="line">    , <span class="type">Counter</span>.view (<span class="type">Signal</span>.forwardTo address <span class="type">Bottom</span>) model.bottomCounter</span><br><span class="line">    , button [ onClick address <span class="type">Reset</span> ] [ text <span class="string">"RESET"</span> ]</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p>我們可以重複使用 <code>Counter.view</code> function 於兩個 counters. 於每個 counter 我們創造一個 forwarding address.我們在這裡做的事為，這兩個計數器會把傳出的訊息以 <code>Top</code> or <code>Bottom</code> tag起來，讓我們可以區分。</p>
+<p>接著我們還可以讓他更巢狀化，我們可以使用 <code>CounterPair</code> module,指對外展示出一些 key values 與d functions, 再創造一個 <code>CounterPairPair</code> 或是任何你想要的。</p>
+<h2 id="Example-3-A-Dynamic-List-of-Counters"><a href="#Example-3-A-Dynamic-List-of-Counters" class="headerlink" title="Example 3: A Dynamic List of Counters"></a>Example 3: A Dynamic List of Counters</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/3.html" target="_blank" rel="noopener">demo</a> / <a href="examples/3/">see code</a></strong></p>
+<p>接著我們要來創造一系列的計數器，我們可使用add或remove來增加與減少畫面上計數器的數量。</p>
+<p>我們一樣複用 <code>Counter</code> module ，如同上面的範例。 </p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> Counter (<span class="type">Model</span>, init, <span class="type">Action</span>, update, view)</span><br></pre></td></tr></table></figure>
+
+<p>接著我們可以直接開始設計 <code>CounterList</code> module，和之前一樣 ，先從 <code>Model</code>開始:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> =</span><br><span class="line">    &#123; counters : <span class="type">List</span> ( <span class="type">ID</span>, <span class="type">Counter</span>.<span class="type">Model</span> )</span><br><span class="line">    , nextID : <span class="type">ID</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">ID</span> = <span class="type">Int</span></span><br></pre></td></tr></table></figure>
+
+<p>現在我們的model有一系列的counter,每個均擁有一個獨特的ID，讓我們可以區別他們，
+(這些 ID 還帶給我們於 rendering時具有最佳化的表現<a href="http://package.elm-lang.org/packages/evancz/elm-html/latest/Html-Attributes#key" target="_blank" rel="noopener"><code>key</code></a> )</p>
+<p>我們的model 還包含了一個<code>nextID</code>這可以幫助我們在新增counter時，可以分配新的ID給他</p>
+<p>現在我們來定義一系列的<code>Actions</code> 用來傳給 model。包含了 add counters、 remove counters與update certain counters.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span></span><br><span class="line">    = <span class="type">Insert</span></span><br><span class="line">    | <span class="type">Remove</span></span><br><span class="line">    | <span class="type">Modify</span> <span class="type">ID</span> <span class="type">Counter</span>.<span class="type">Action</span></span><br></pre></td></tr></table></figure>
+
+
+<p>現在我們可以定義<code>update</code> function.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">update</span> action model =</span><br><span class="line">  <span class="keyword">case</span> action <span class="keyword">of</span></span><br><span class="line">    <span class="type">Insert</span> -&gt;</span><br><span class="line">      <span class="keyword">let</span> newCounter = ( model.nextID, <span class="type">Counter</span>.init <span class="number">0</span> )</span><br><span class="line">          newCounters = model.counters ++ [ newCounter ]</span><br><span class="line">      <span class="keyword">in</span></span><br><span class="line">          &#123; model |</span><br><span class="line">              counters = newCounters,</span><br><span class="line">              nextID = model.nextID + <span class="number">1</span></span><br><span class="line">          &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">Remove</span> -&gt;</span><br><span class="line">      &#123; model | counters = <span class="type">List</span>.drop <span class="number">1</span> model.counters &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">Modify</span> id counterAction -&gt;</span><br><span class="line">      <span class="keyword">let</span> updateCounter (counterID, counterModel) =</span><br><span class="line">            <span class="keyword">if</span> counterID == id</span><br><span class="line">                <span class="keyword">then</span> (counterID, <span class="type">Counter</span>.update counterAction counterModel)</span><br><span class="line">                <span class="keyword">else</span> (counterID, counterModel)</span><br><span class="line">      <span class="keyword">in</span></span><br><span class="line">          &#123; model | counters = <span class="type">List</span>.map updateCounter model.counters &#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看下面的描述:</p>
+<ul>
+<li><p><code>Insert</code> &mdash; 首先我們創造了一個新的計數器， 放在所有以建造的計數器的最後。
+接著增加 <code>nextID</code> 來讓下一次使用。</p>
+</li>
+<li><p><code>Remove</code> &mdash;從許多計數器中移除最前面那個</p>
+</li>
+<li><p><code>Modify</code> &mdash; 找尋這些計數器中與其符合的 ID, 我們在這個符合的計數器上執行這個 <code>Action</code></p>
+</li>
+</ul>
+<p>最後是定義我們的 <code>view</code>.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">view</span> : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">view</span> address model =</span><br><span class="line">  <span class="keyword">let</span> counters = <span class="type">List</span>.map (viewCounter address) model.counters</span><br><span class="line">      remove = button [ onClick address <span class="type">Remove</span> ] [ text <span class="string">"Remove"</span> ]</span><br><span class="line">      insert = button [ onClick address <span class="type">Insert</span> ] [ text <span class="string">"Add"</span> ]</span><br><span class="line">  <span class="keyword">in</span></span><br><span class="line">      div [] ([remove, insert] ++ counters)</span><br><span class="line"></span><br><span class="line"><span class="title">viewCounter</span> : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span> -&gt; (<span class="type">ID</span>, <span class="type">Counter</span>.<span class="type">Model</span>) -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">viewCounter</span> address (id, model) =</span><br><span class="line">  <span class="type">Counter</span>.view (<span class="type">Signal</span>.forwardTo address (<span class="type">Modify</span> id)) model</span><br></pre></td></tr></table></figure>
+
+<p>有趣的地方在於其中的 <code>viewCounter</code> function. 他使用先前的
+<code>Counter.view</code> function，但這次，我們提供了一個 forwarding address 上面標住了所有被 rendered的counter的相關訊息。</p>
+<p>當我們真正創造 <code>view</code> function時， 我們對所有counters進行了<code>viewCounter</code>的map動作，並且創造兩個按鈕:add 、remove ，直接傳遞到 the <code>address</code> 中</p>
+<p>上面這種創造 ID的方法，可以用於任何你想要於子組件創造動態數字時，也可應用在其他範例，例如: list of user profiles 、 tweets 或是 newsfeed items 以及 product details中。</p>
+<h2 id="Example-4-A-Fancier-List-of-Counters"><a href="#Example-4-A-Fancier-List-of-Counters" class="headerlink" title="Example 4: A Fancier List of Counters"></a>Example 4: A Fancier List of Counters</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/4.html" target="_blank" rel="noopener">demo</a> / <a href="examples/4/">see code</a></strong></p>
+<p>但是，如果我們想要不只是有一個移除按鈕，而是想讓每個按鈕擁有自己專屬的移除按鈕呢? </p>
+<p>要這麼做的話，我們先保持原本的<code>view</code> function 不變，並且可以新增一個<code>viewWithRemoveButton</code>，如以下範例:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> Counter (<span class="type">Model</span>, init, <span class="type">Action</span>, update, view, viewWithRemoveButton, <span class="type">Context</span>) <span class="keyword">where</span></span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Context</span> =</span><br><span class="line">    &#123; actions : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span></span><br><span class="line">    , remove : <span class="type">Signal</span>.<span class="type">Address</span> ()</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="title">viewWithRemoveButton</span> : <span class="type">Context</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">viewWithRemoveButton</span> context model =</span><br><span class="line">  div []</span><br><span class="line">    [ button [ onClick context.actions <span class="type">Decrement</span> ] [ text <span class="string">"-"</span> ]</span><br><span class="line">    , div [ countStyle ] [ text (toString model) ]</span><br><span class="line">    , button [ onClick context.actions <span class="type">Increment</span> ] [ text <span class="string">"+"</span> ]</span><br><span class="line">    , div [ countStyle ] []</span><br><span class="line">    , button [ onClick context.remove () ] [ text <span class="string">"X"</span> ]</span><br><span class="line">    ]</span><br></pre></td></tr></table></figure>
+
+<p><code>viewWithRemoveButton</code> function 增加了一個額外的按鈕，其中  increment/decrement 按紐送出訊息到 <code>actions</code> address 中，但移除按鈕
+送出訊息到 <code>remove</code> address中。 在 <code>remove</code> 訊息中寫了類似下面的文字, &ldquo;任何擁有我的人請移除我!&rdquo; </p>
+<p>現在我們有了新的 <code>viewWithRemoveButton</code>，我們可以建造一個 <code>CounterList</code> module 用來放置每個獨立的計數器， 其中 <code>Model</code> 和範例3的相同  </p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> =</span><br><span class="line">    &#123; counters : <span class="type">List</span> ( <span class="type">ID</span>, <span class="type">Counter</span>.<span class="type">Model</span> )</span><br><span class="line">    , nextID : <span class="type">ID</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">ID</span> = <span class="type">Int</span></span><br></pre></td></tr></table></figure>
+
+<p>但這裡的 actions 有一些改變，這裡我們想讓他可以移除特定的按鈕，所以 <code>Remove</code> case 現在擁有一個 ID。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span></span><br><span class="line">    = <span class="type">Insert</span></span><br><span class="line">    | <span class="type">Remove</span> <span class="type">ID</span></span><br><span class="line">    | <span class="type">Modify</span> <span class="type">ID</span> <span class="type">Counter</span>.<span class="type">Action</span></span><br></pre></td></tr></table></figure>
+<p>其中的<code>update</code> function 和範例 3的相同。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">update</span> action model =</span><br><span class="line">  <span class="keyword">case</span> action <span class="keyword">of</span></span><br><span class="line">    <span class="type">Insert</span> -&gt;</span><br><span class="line">      &#123; model |</span><br><span class="line">          counters = ( model.nextID, <span class="type">Counter</span>.init <span class="number">0</span> ) :: model.counters,</span><br><span class="line">          nextID = model.nextID + <span class="number">1</span></span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">Remove</span> id -&gt;</span><br><span class="line">      &#123; model |</span><br><span class="line">          counters = <span class="type">List</span>.filter (\(counterID, _) -&gt; counterID /= id) model.counters</span><br><span class="line">      &#125;</span><br><span class="line"></span><br><span class="line">    <span class="type">Modify</span> id counterAction -&gt;</span><br><span class="line">      <span class="keyword">let</span> updateCounter (counterID, counterModel) =</span><br><span class="line">            <span class="keyword">if</span> counterID == id</span><br><span class="line">                <span class="keyword">then</span> (counterID, <span class="type">Counter</span>.update counterAction counterModel)</span><br><span class="line">                <span class="keyword">else</span> (counterID, counterModel)</span><br><span class="line">      <span class="keyword">in</span></span><br><span class="line">          &#123; model | counters = <span class="type">List</span>.map updateCounter model.counters &#125;</span><br></pre></td></tr></table></figure>
+
+<p>其中的 <code>Remove</code>， 我們過濾出了想要的ID</p>
+<p>最後是 <code>view</code>:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">view</span> : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">view</span> address model =</span><br><span class="line">  <span class="keyword">let</span> insert = button [ onClick address <span class="type">Insert</span> ] [ text <span class="string">"Add"</span> ]</span><br><span class="line">  <span class="keyword">in</span></span><br><span class="line">      div [] (insert :: <span class="type">List</span>.map (viewCounter address) model.counters)</span><br><span class="line"></span><br><span class="line"><span class="title">viewCounter</span> : <span class="type">Signal</span>.<span class="type">Address</span> <span class="type">Action</span> -&gt; (<span class="type">ID</span>, <span class="type">Counter</span>.<span class="type">Model</span>) -&gt; <span class="type">Html</span></span><br><span class="line"><span class="title">viewCounter</span> address (id, model) =</span><br><span class="line">  <span class="keyword">let</span> context =</span><br><span class="line">        <span class="type">Counter</span>.<span class="type">Context</span></span><br><span class="line">          (<span class="type">Signal</span>.forwardTo address (<span class="type">Modify</span> id))</span><br><span class="line">          (<span class="type">Signal</span>.forwardTo address (always (<span class="type">Remove</span> id)))</span><br><span class="line">  <span class="keyword">in</span></span><br><span class="line">      <span class="type">Counter</span>.viewWithRemoveButton context model</span><br></pre></td></tr></table></figure>
+
+<p>在 <code>viewCounter</code> function中，我們建造了 <code>Counter.Context</code> 用來傳遞所有必要的 forwarding addresses。在兩個情況，我們均標註了 <code>Counter.Action</code> 讓我們知道該移除或修改哪個counter、</p>
+<h2 id="Big-Lessons-So-Far-到目前為止"><a href="#Big-Lessons-So-Far-到目前為止" class="headerlink" title="Big Lessons So Far(到目前為止)"></a>Big Lessons So Far(到目前為止)</h2><p><strong>Basic Pattern</strong> &mdash; 所有東西都是圍繞著 <code>Model</code>所建構的，包含 <code>更新</code> model, 以及將model轉為 <code>view</code> ，都是根據這個設計模式在變動。</p>
+<p><strong>Nesting Modules</strong> &mdash; Forwarding addresses 讓巢狀化更加簡單，把實做細節整個隱藏起來。 我們可以繼續往下一層深入實做，而每一層只需要知道在他的上一層發生了什麼事就好。</p>
+<p><strong>Adding Context</strong> &mdash; 有時在 <code>更新</code> 或是 <code>檢視</code> 我們的 model時，額外的資訊是很必要的。我們可以增加一些 <code>Context</code>到這些 functions 在避免 <code>Model</code>變得更複雜的情況下，將這些資訊傳遞進去。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">update</span> : <span class="type">Context</span> -&gt; <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Model</span></span><br><span class="line"><span class="title">view</span> : <span class="type">Context'</span> -&gt; <span class="type">Model</span> -&gt; <span class="type">Html</span></span><br></pre></td></tr></table></figure>
+
+<p>在巢狀結構下的每一層， 我們可以導出一些特定的 <code>Context</code>給子模組使用。</p>
+<p><strong>Testing is Easy</strong> &mdash; 我們在這建立的所有function都是所謂的 <a href="http://en.wikipedia.org/wiki/Pure_function" target="_blank" rel="noopener">pure functions</a>.這讓你在測試你的 <code>update</code> function時
+變得很簡單。 在這之中沒有特定的步驟，你可以直接呼叫你想測試的函式與參數來進行測試。</p>
+<h2 id="Example-5-Random-GIF-Viewer"><a href="#Example-5-Random-GIF-Viewer" class="headerlink" title="Example 5: Random GIF Viewer"></a>Example 5: Random GIF Viewer</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/5.html" target="_blank" rel="noopener">demo</a> / <a href="examples/5/">see code</a></strong></p>
+<p>我們展示了如何建立巢狀的元件， 但，我們該如何執行一個HTTP request呢?如何跟 database 取得資料?在這個範例中使用了 <a href="http://package.elm-lang.org/packages/evancz/elm-effects/latest" target="_blank" rel="noopener">the <code>elm-effects</code> package</a>來建立一個簡單的元件，可以從 giphy.com取得隨機的 gifs  其中包含 “funny cats” topic。</p>
+<p>在這個範例<a href="examples/5/RandomGif.elm">the implementation</a>，與範例1很類似， <code>Model</code> 如下(非常典型)l:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> =</span><br><span class="line">    &#123; topic : <span class="type">String</span></span><br><span class="line">    , gifUrl : <span class="type">String</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>我們需要知道要找尋的 <code>topic</code> 以及 <code>gifUrl</code>。這個範例特別點在於<code>init</code> 與 <code>update</code>是一個暫時為空想的types:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">init</span> : <span class="type">String</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br></pre></td></tr></table></figure>
+
+<p>相較於直接返回一個新的 <code>Model</code>，為了讓我們可以執行一些效果<a href="http://package.elm-lang.org/packages/evancz/elm-effects/latest/Effects" target="_blank" rel="noopener">the <code>Effects</code> API</a>，可參考如下範例</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">module</span> Effects <span class="keyword">where</span></span><br><span class="line"></span><br><span class="line">type Effects a</span><br><span class="line"></span><br><span class="line">none : Effects a</span><br><span class="line">  <span class="comment">-- don't do anything</span></span><br><span class="line"></span><br><span class="line">task : Task Never a -&gt; Effects a</span><br><span class="line">  <span class="comment">-- request a task, do HTTP and database stuff</span></span><br></pre></td></tr></table></figure>
+
+<p>其中的 <code>Effects</code> type為一個 擁有許多不同 tasks的資料結構，將會在未來去執行，我們用下面的範例來展示 <code>update</code> 是如何執行的:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span></span><br><span class="line">    = <span class="type">RequestMore</span></span><br><span class="line">    | <span class="type">NewGif</span> (<span class="type">Maybe</span> <span class="type">String</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br><span class="line"><span class="title">update</span> msg model =</span><br><span class="line">  <span class="keyword">case</span> msg <span class="keyword">of</span></span><br><span class="line">    <span class="type">RequestMore</span> -&gt;</span><br><span class="line">      ( model</span><br><span class="line">      , getRandomGif model.topic</span><br><span class="line">      )</span><br><span class="line"></span><br><span class="line">    <span class="type">NewGif</span> maybeUrl -&gt;</span><br><span class="line">      ( <span class="type">Model</span> model.topic (<span class="type">Maybe</span>.withDefault model.gifUrl maybeUrl)</span><br><span class="line">      , <span class="type">Effects</span>.none</span><br><span class="line">      )</span><br><span class="line"></span><br><span class="line"><span class="comment">-- getRandomGif : String -&gt; Effects Action</span></span><br></pre></td></tr></table></figure>
+
+<p>使用者可以觸發一個 <code>RequestMore</code> action 於點擊“More Please!” 按鈕之後， 當server 回覆時將返回一個 <code>NewGif</code> action，這兩個情景都寫在<code>update</code> function中。</p>
+<p>其中 <code>RequestMore</code> 將會先返回一個已存在的 model， 並且我們還使用了 <code>getRandomGif</code> function建造了一個 <code>Effects Action</code>。 在後面會講到<code>getRandomGif</code>是如何定義的。現在我們只需要知道，當<code>Effects Action</code> 在執行時，他會產生大量的 <code>Action</code> values並且被導向到程式的各個部分。最後 <code>getRandomGif model.topic</code> 將產生向下面這樣的action:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">NewGif</span> (<span class="type">Just</span> <span class="string">"http://s3.amazonaws.com/giphygifs/media/ka1aeBvFCSLD2/giphy.gif"</span>)</span><br></pre></td></tr></table></figure>
+
+<p>並且返回一個<code>Maybe</code> 因為這個送往server的request可能會失敗。 <code>Action</code>會被傳回 <code>update</code> function. 所以假設向server的請求失敗時，我們依然保持原有的 <code>model.gifUrl</code>.</p>
+<p>在 <code>init</code>將會發生相同的事。他定義了一個初始的 model並且使用特定的topic向giphy.com’s API請求 GIF 圖片。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">init</span> : <span class="type">String</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br><span class="line"><span class="title">init</span> topic =</span><br><span class="line">  ( <span class="type">Model</span> topic <span class="string">"assets/waiting.gif"</span></span><br><span class="line">  , getRandomGif topic</span><br><span class="line">  )</span><br><span class="line"></span><br><span class="line"><span class="comment">-- getRandomGif : String -&gt; Effects Action</span></span><br></pre></td></tr></table></figure>
+
+<p>當 random GIF effect 完成時， 他將會產生一個 <code>Action</code> 並且導向 <code>update</code> function.</p>
+<blockquote>
+<p><strong>Note:</strong> 目前為止我們使用了 <code>StartApp.Simple</code> module 來源為<a href="http://package.elm-lang.org/packages/evancz/start-app/latest" target="_blank" rel="noopener">the start-app package</a>接著我們需要更新 <code>StartApp</code> module. 它可以用來處理更複雜的應用
+. It has <a href="http://package.elm-lang.org/packages/evancz/start-app/latest/StartApp" target="_blank" rel="noopener">a slightly fancier API</a>他將可以處理 new <code>init</code> 與 <code>update</code> types.</p>
+</blockquote>
+<p>其中需要注意的一點是 <code>getRandomGif</code> function 用來定義如何取得 random GIF，他使用了 <a href="http://elm-lang.org/guide/reactivity#tasks" target="_blank" rel="noopener">tasks</a> 與 <a href="http://package.elm-lang.org/packages/evancz/elm-http/latest" target="_blank" rel="noopener">the <code>Http</code> package</a>, 下面的範例將會教導如何使用他們:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">getRandomGif</span> : <span class="type">String</span> -&gt; <span class="type">Effects</span> <span class="type">Action</span></span><br><span class="line"><span class="title">getRandomGif</span> topic =</span><br><span class="line">  <span class="type">Http</span>.get decodeImageUrl (randomUrl topic)</span><br><span class="line">    |&gt; <span class="type">Task</span>.toMaybe</span><br><span class="line">    |&gt; <span class="type">Task</span>.map <span class="type">NewGif</span></span><br><span class="line">    |&gt; <span class="type">Effects</span>.task</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 第一行創造了一個 HTTP GET request. 他試著</span></span><br><span class="line"><span class="comment">-- 去從  `randomUrl topic`取得JSON </span></span><br><span class="line"><span class="comment">-- 並且使用 `decodeImageUrl`解析它，下方可以看到他們的定義</span></span><br><span class="line"><span class="comment">--</span></span><br><span class="line"><span class="comment">-- 接著我們使用了 `Task.toMaybe`來抓取任何潛在的錯誤 </span></span><br><span class="line"><span class="comment">-- 並且讓 `NewGif` tag 的結果轉為 `Action`.</span></span><br><span class="line"><span class="comment">-- 最後我們將它轉為 `Effects` value 讓它可以用在接下來的</span></span><br><span class="line"><span class="comment">-- `init` 或是 `update` functions中.</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 給入一個 topic,與 URL 傳給 giphy API.</span></span><br><span class="line"><span class="title">randomUrl</span> : <span class="type">String</span> -&gt; <span class="type">String</span></span><br><span class="line"><span class="title">randomUrl</span> topic =</span><br><span class="line">  <span class="type">Http</span>.url <span class="string">"http://api.giphy.com/v1/gifs/random"</span></span><br><span class="line">    [ <span class="string">"api_key"</span> =&gt; <span class="string">"dc6zaTOxFJmzC"</span></span><br><span class="line">    , <span class="string">"tag"</span> =&gt; topic</span><br><span class="line">    ]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">--  JSON decoder 將會接受大批的 JSON 並且</span></span><br><span class="line"><span class="comment">-- 取出其中的 `json.data.image_url` </span></span><br><span class="line"><span class="title">decodeImageUrl</span> : <span class="type">Json</span>.<span class="type">Decoder</span> <span class="type">String</span></span><br><span class="line"><span class="title">decodeImageUrl</span> =</span><br><span class="line">  <span class="type">Json</span>.at [<span class="string">"data"</span>, <span class="string">"image_url"</span>] <span class="type">Json</span>.string</span><br></pre></td></tr></table></figure>
+
+<p>當我們寫好這些後，未來，我們將可以使用 <code>getRandomGif</code> 於 <code>init</code>與 <code>update</code> functions中</p>
+<p>其中有趣的一點是， <code>getRandomGif</code>所返回的task將永遠不會失敗，因為我們希望所有可能發生的失敗都要被明確的處理，下面將會解釋這點。</p>
+<p>每個<code>Task</code> 有兩個型態，分別為 failure type 與 success type。 舉例來說:一個 HTTP task 可能有一個type 類似 <code>Task Http.Error String</code>
+以此範例來說，它可能會失敗於<code>Http.Error</code> 或是成功返回 <code>String</code>， 這讓我們可以處理一系列的task並且不用處理錯誤發生。</p>
+<p>現在，假設我們有一個 component 要求了一個  task, 但是這個 task 失敗了。接下來會發生什麼事? 誰會被通知? 該如何復原它? 
+我們創造了一個發生錯誤時的錯誤型態 <code>Never</code> 我們讓任何可能發生的錯誤，都轉到了 success type ，讓他們可以明確地被處理。
+在範例中，我們使用了 <code>Task.toMaybe : Task x a -&gt; Task y (Maybe a)</code> 所以我們的 <code>update</code> function 可以精準的處理 HTTP failures的情況。</p>
+<h2 id="Example-6-Pair-of-random-GIF-viewers"><a href="#Example-6-Pair-of-random-GIF-viewers" class="headerlink" title="Example 6: Pair of random GIF viewers"></a>Example 6: Pair of random GIF viewers</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/6.html" target="_blank" rel="noopener">demo</a> / <a href="examples/6/">see code</a></strong></p>
+<p>一般的effects 可以被處理，但如果是<em>巢狀的</em> effects呢?這個範例使用了和範例 5同樣的程式，用來建立一對獨立的GIF viewers.</p>
+<p>在你看完 <a href="examples/6/RandomGifPair.elm">the implementation</a>後，你會發現他和範例二有點類似， 其中的 <code>Model</code>定義了兩個 <code>RandomGif.Model</code> 的值:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> =</span><br><span class="line">    &#123; left : <span class="type">RandomGif</span>.<span class="type">Model</span></span><br><span class="line">    , right : <span class="type">RandomGif</span>.<span class="type">Model</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
+<p>這讓我們可以分別的處理它們。 其中的actions指是負責用來傳遞訊息到子組件用的。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span></span><br><span class="line">    = <span class="type">Left</span> <span class="type">RandomGif</span>.<span class="type">Action</span></span><br><span class="line">    | <span class="type">Right</span> <span class="type">RandomGif</span>.<span class="type">Action</span></span><br></pre></td></tr></table></figure>
+
+<p>我們使用 <code>Left</code> 與 <code>Right</code> 在我們的 <code>update</code> 與 <code>init</code> functions中</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- Effects.map : (a -&gt; b) -&gt; Effects a -&gt; Effects b</span></span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br><span class="line"><span class="title">update</span> action model =</span><br><span class="line">  <span class="keyword">case</span> action <span class="keyword">of</span></span><br><span class="line">    <span class="type">Left</span> msg -&gt;</span><br><span class="line">      <span class="keyword">let</span></span><br><span class="line">        (left, fx) = <span class="type">RandomGif</span>.update msg model.left</span><br><span class="line">      <span class="keyword">in</span></span><br><span class="line">        ( <span class="type">Model</span> left model.right</span><br><span class="line">        , <span class="type">Effects</span>.map <span class="type">Left</span> fx</span><br><span class="line">        )</span><br><span class="line"></span><br><span class="line">    <span class="type">Right</span> msg -&gt;</span><br><span class="line">      <span class="keyword">let</span></span><br><span class="line">        (right, fx) = <span class="type">RandomGif</span>.update msg model.right</span><br><span class="line">      <span class="keyword">in</span></span><br><span class="line">        ( <span class="type">Model</span> model.left right</span><br><span class="line">        , <span class="type">Effects</span>.map <span class="type">Right</span> fx</span><br><span class="line">        )</span><br></pre></td></tr></table></figure>
+
+<p>在每個分支中，我們使用了 <code>RandomGif.update</code> function 其可以回傳一個 model 以及(effect)  <code>fx</code>。和先前一樣先回傳一個普通的model，
+但我們需要在effects中做一些不同的事。我們這次不讓他直接return，我們將使用 <a href="http://package.elm-lang.org/packages/evancz/elm-effects/latest/Effects#map" target="_blank" rel="noopener"><code>Effects.map</code></a> function
+將他們轉為同類型的<code>Action</code>，和 <code>Signal.forwardTo</code>類似，讓我們對values進行 tag的動作，讓我們清楚的知道它該被導向哪裡。</p>
+<p>而<code>init</code> function也做一樣的事， 我們提供一個topic 給每個 random GIF viewer 並且得到回傳的初始 model 與 effects。</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">init</span> : <span class="type">String</span> -&gt; <span class="type">String</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br><span class="line"><span class="title">init</span> leftTopic rightTopic =</span><br><span class="line">  <span class="keyword">let</span></span><br><span class="line">    (left, leftFx) = <span class="type">RandomGif</span>.init leftTopic</span><br><span class="line">    (right, rightFx) = <span class="type">RandomGif</span>.init rightTopic</span><br><span class="line">  <span class="keyword">in</span></span><br><span class="line">    ( <span class="type">Model</span> left right</span><br><span class="line">    , <span class="type">Effects</span>.batch</span><br><span class="line">        [ <span class="type">Effects</span>.map <span class="type">Left</span> leftFx</span><br><span class="line">        , <span class="type">Effects</span>.map <span class="type">Right</span> rightFx</span><br><span class="line">        ]</span><br><span class="line">    )</span><br><span class="line"></span><br><span class="line"><span class="comment">-- Effects.batch : List (Effects a) -&gt; Effects a</span></span><br></pre></td></tr></table></figure>
+
+<p>在這個範例，我們不止使用 <code>Effects.map</code> 來 tag 結果，我們還會使用 <a href="http://package.elm-lang.org/packages/evancz/elm-effects/latest/Effects#batch" target="_blank" rel="noopener"><code>Effects.batch</code></a> function 來讓他們混在一起。
+ 每個 requested tasks 將會獨立的運行，所以 left 與 right effects將會同一時間一起運作。</p>
+<h2 id="Example-7-List-of-random-GIF-viewers"><a href="#Example-7-List-of-random-GIF-viewers" class="headerlink" title="Example 7: List of random GIF viewers"></a>Example 7: List of random GIF viewers</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/7.html" target="_blank" rel="noopener">demo</a> / <a href="examples/7/">see code</a></strong></p>
+<p>這個範例讓你有一系列的 random GIF viewers 你可以創造你自己的topics，並且，我們仍然使用之前的 <code>RandomGif</code> module。</p>
+<p>當你看完 <a href="examples/7/RandomGifList.elm">the implementation</a> 你會發現他和 範例 3是相對應的。我們將所有子model放在相同list ，
+並用ID來分辨與連結它們， 唯一改變的地方在於:在 <code>init</code> 與 <code>update</code> function中的 <code>Effects</code> ， 將使用 <code>Effects.map</code> 與 <code>Effects.batch</code>把他們放在一起。</p>
+<p>如果你對下面這個章節有任何的問題，你可以在這個repo創造一個issue來解決你的問題。</p>
+<h2 id="Example-8-Animation"><a href="#Example-8-Animation" class="headerlink" title="Example 8: Animation"></a>Example 8: Animation</h2><p><strong><a href="http://evancz.github.io/elm-architecture-tutorial/examples/8.html" target="_blank" rel="noopener">demo</a> / <a href="examples/8/">see code</a></strong></p>
+<p>現在我們知道擁有tasks的 components 可以被巢狀的使用， 但要怎麼把它應用在動畫中呢?</p>
+<p>有趣的是， 它的做法和先前的做法類似! </p>
+<p>這個範例是兩個可以點擊的四方體， 當你點擊後， 它會旋轉90度。總體來說這裡的code 源自於 範例 2 和 範例 6 
+我們將所有跟動畫相關的邏輯放在<code>SpinSquare.elm</code> 我們重複使用的部分放在 <code>SpinSquarePair.elm</code>. </p>
+<p>根據這個範例 <a href="examples/8/SpinSquare.elm">in <code>SpinSquare</code></a> 第一件要做的事為處理 model:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">Model</span> =</span><br><span class="line">    &#123; angle : <span class="type">Float</span></span><br><span class="line">    , animationState : <span class="type">AnimationState</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> <span class="keyword">alias</span> <span class="type">AnimationState</span> =</span><br><span class="line">    <span class="type">Maybe</span> &#123; prevClockTime : <span class="type">Time</span>,  elapsedTime: <span class="type">Time</span> &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="title">rotateStep</span> = <span class="number">90</span></span><br><span class="line"><span class="title">duration</span> = second</span><br></pre></td></tr></table></figure>
+
+<p>我們核心的model為 <code>angle</code> 指出了四方體的當前角度，而<code>animationState</code> 用來指出目前的動畫，假如現在沒有動畫，它將是 <code>Nothing</code>
+但假如現在有動畫，它將會是:</p>
+<ul>
+<li><code>prevClockTime</code> &mdash; 可以讓我們知道與上次的影格相距多少毫秒(milliseconds) 。</li>
+<li><code>elapsedTime</code> &mdash;指出 數字0 與 <code>已經過時間</code>兩者之差距，用來了解動畫進行了多久。</li>
+</ul>
+<p>而<code>rotateStep</code> 用來宣告每次點擊他轉了多少角度，你可以隨意去改變它，不會對你程式造成影響。</p>
+<p>有趣的事情發生在 <code>update</code>中:</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> <span class="type">Action</span></span><br><span class="line">    = <span class="type">Spin</span></span><br><span class="line">    | <span class="type">Tick</span> <span class="type">Time</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="title">update</span> : <span class="type">Action</span> -&gt; <span class="type">Model</span> -&gt; (<span class="type">Model</span>, <span class="type">Effects</span> <span class="type">Action</span>)</span><br><span class="line"><span class="title">update</span> msg model =</span><br><span class="line">  <span class="keyword">case</span> msg <span class="keyword">of</span></span><br><span class="line">    <span class="type">Spin</span> -&gt;</span><br><span class="line">      <span class="keyword">case</span> model.animationState <span class="keyword">of</span></span><br><span class="line">        <span class="type">Nothing</span> -&gt;</span><br><span class="line">          ( model, <span class="type">Effects</span>.tick <span class="type">Tick</span> )</span><br><span class="line"></span><br><span class="line">        <span class="type">Just</span> _ -&gt;</span><br><span class="line">          ( model, <span class="type">Effects</span>.none )</span><br><span class="line"></span><br><span class="line">    <span class="type">Tick</span> clockTime -&gt;</span><br><span class="line">      <span class="keyword">let</span></span><br><span class="line">        newElapsedTime =</span><br><span class="line">          <span class="keyword">case</span> model.animationState <span class="keyword">of</span></span><br><span class="line">            <span class="type">Nothing</span> -&gt;</span><br><span class="line">              <span class="number">0</span></span><br><span class="line"></span><br><span class="line">            <span class="type">Just</span> &#123;elapsedTime, prevClockTime&#125; -&gt;</span><br><span class="line">              elapsedTime + (clockTime - prevClockTime)</span><br><span class="line">      <span class="keyword">in</span></span><br><span class="line">        <span class="keyword">if</span> newElapsedTime &gt; duration <span class="keyword">then</span></span><br><span class="line">          ( &#123; angle = model.angle + rotateStep</span><br><span class="line">            , animationState = <span class="type">Nothing</span></span><br><span class="line">            &#125;</span><br><span class="line">          , <span class="type">Effects</span>.none</span><br><span class="line">          )</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">          ( &#123; angle = model.angle</span><br><span class="line">            , animationState = <span class="type">Just</span> &#123; elapsedTime = newElapsedTime, prevClockTime = clockTime &#125;</span><br><span class="line">            &#125;</span><br><span class="line">          , <span class="type">Effects</span>.tick <span class="type">Tick</span></span><br><span class="line">          )</span><br></pre></td></tr></table></figure>
+
+<p>我們需要處理兩種 <code>Action</code> :</p>
+<ul>
+<li><code>Spin</code> 當一個 user 點擊shape並且 requesting a spin。 接著在 <code>update</code> function中，假設現在沒有動畫在進行，我們會request 一個 clock tick，並且保持原來的狀態，但假裝已經有事情在作用了。</li>
+<li><code>Tick</code> 當我們取得了 clock tick 我們將需要取得 animation step.在 <code>update</code> function中 ，我們需要去更新 <code>animationState</code>. </li>
+<li>第一件事，我們會去檢查當下是否有動畫在進行， 假如有，我們會使用當下的 <code>elapsedTime</code> 去確認 <code>newElapsedTime</code>的值。
+並且在其中加入 <code>time diff</code>。</li>
+</ul>
+<p>假設現在的elapsed time 大於 <code>duration</code> 我們將會停止動畫，並且暫停 requesting new clock ticks.
+假設小於， 我們會更新現在的 animation state 並且 request another clock tick。</p>
+<p>最後，我們會有<code>view</code> function! 在這個範例有一個不錯的動畫 ，但其實我們只是以線性的方式去遞增<code>elapsedTime</code>。這是如何發生的?</p>
+<p>其中 <code>view</code> 的程式碼是源自 <a href="http://package.elm-lang.org/packages/evancz/elm-svg/latest/" target="_blank" rel="noopener"><code>elm-svg</code></a> 為了做出其他更有趣並且可點擊產生動畫的形狀. 
+在view程式碼中 <code>toOffset</code> 將會計算目前所旋轉的偏移量 <code>AnimationState</code>.</p>
+<figure class="highlight elm"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- import Easing exposing (ease, easeOutBounce, float)</span></span><br><span class="line"></span><br><span class="line"><span class="title">toOffset</span> : <span class="type">AnimationState</span> -&gt; <span class="type">Float</span></span><br><span class="line"><span class="title">toOffset</span> animationState =</span><br><span class="line">  <span class="keyword">case</span> animationState <span class="keyword">of</span></span><br><span class="line">    <span class="type">Nothing</span> -&gt;</span><br><span class="line">      <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="type">Just</span> &#123;elapsedTime&#125; -&gt;</span><br><span class="line">      ease easeOutBounce float <span class="number">0</span> rotateStep duration elapsedTime</span><br></pre></td></tr></table></figure>
+
+<p>我們使用的是<a href="https://github.com/Dandandan" target="_blank" rel="noopener">@Dandandan</a>’s <a href="http://package.elm-lang.org/packages/Dandandan/Easing/latest" target="_blank" rel="noopener">easing package</a> 讓我們可以簡單的做到一些動畫 <a href="http://easings.net/" target="_blank" rel="noopener">all sorts of cool easings</a>包含數字,顏色,點,或是任何其他你想要的東西。.</p>
+<p><code>ease</code> function 會取得一個數字在 0 與 <code>duration</code>間。 接著把它轉換為 0 與 <code>rotateStep</code> 間的數字
+並且提供一個 easing， 在範例中，我們提供了 <code>easeOutBounce</code> 意思為我們slide from 0 to <code>duration</code>，我們將會獲得一個數字在 0 and 90 之間，並且具有easing 效果。</p>
+<p>接著在下面的連結試試 <code>easeOutBounce</code> 吧 <a href="http://package.elm-lang.org/packages/Dandandan/Easing/latest/Easing" target="_blank" rel="noopener">other easings</a></p>
+<p>我們使用 <code>SpinSquarePair</code>將大部分的東西結合再一起，但他們其實和範例  2 與範例 6 類似。</p>
+<p>以上即是我們使用這個  library所進行的animation ! 如果有任何不清楚的地方請歡迎提出來!</p>
+<blockquote>
+<p>Note: 我期待我們可以於這個核心概念上做一些更酷的東西 。 如果你有任何更好的想法，請讓我們知道!</p>
+</blockquote>
+<h1 id="Reactivity"><a href="#Reactivity" class="headerlink" title="Reactivity"></a>Reactivity</h1><p>在上一章，我們學習了有關Elm 的架構，於這一章，
+我們將談到如何與 servers進行溝通、使用 websockets等等， 下面這張圖展示了一些基本概念</p>
+<p><img src="https://cloud.githubusercontent.com/assets/11001914/15096410/be52f858-1528-11e6-846a-b2b53a98f41d.png" alt="456"></p>
+<p>我們程式主要邏輯都在Elm Architecture被描述到了，讓我們可以達到 stateless functions 與 immutability。這裡我們將會談到有關 
+signals ，用來對事件進行路由的動作。</p>
+<p>當我們想要產生一些effect時，我們會建立一個與核心邏輯分開的service， 每個 service 會負責不同的 task，例如 與資料庫進行連接，或使用
+websockets等等，我們將這些都寫在 tasks中。</p>
+<p>把這些 services 分開，對我們有很大的幫助，最明顯的幫助是在未來進行測試時會更為簡單。</p>
+<h1 id="Signals"><a href="#Signals" class="headerlink" title="Signals"></a>Signals</h1><p>Signals 負責事件的導向，它將會使用到 Elm Architecture。 在前面的 start-app package我們把這些細節隱藏了， 它只是很簡單的在 signals外面包上了一層。</p>
+<p>你可以想像 signals 是一個固定在運行的程式網絡，從input收到訊息後將它轉向，最終，把產生的訊息輸出到畫面上。</p>
+<p><img src="https://cloud.githubusercontent.com/assets/11001914/15097373/a175170c-154b-11e6-9ad6-cdb3e009f855.png" alt="485"></p>
+<p>上圖是Elm programs中處理程序的流向，我們程式的所有狀態都存在 foldp中，我們主要使用 signals 來進行event的導向。</p>
+<blockquote>
+<p>Note:你可能會想: “全部的狀態都保存在同個地方?! 那怎麼處理關於 encapsulation的問題呢?!?!” 在你關掉這個 tab之前，你可以想像這就像是 一個管理 database 的人: 管理所有 state最困難的地方在於保持它的一致性。 我們要如何保證在一個元件中所做的改變會正確的傳遞到另一個地方呢? 怎麼知道它所存取的state是最新的呢? 當在你的系統中開始有更多的元件時，這些問題將會變得更加的複雜。 以你以前寫Javascript的經驗中，
+state 中的不一致 大概是產生 bugs的最主要原因吧。</p>
+</blockquote>
+<p>在 Elm中 我們把一致性的問題從模組化分開。其中的foldp是一個集中儲存資料的中心，可確保一致性。 而 Elm Architecture 可以保證
+我們的程式模組化。把這些概念分開，我們將可以做得更好。</p>
+<p>我們使用下圖中的 relatively focused API於 <a href="http://package.elm-lang.org/packages/elm-lang/core/3.0.0/Signal" target="_blank" rel="noopener">Signal module API</a>來建立這個網絡:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">map : (a -&gt; b) -&gt; Signal a -&gt; Signal b</span><br><span class="line"></span><br><span class="line">filter : (a -&gt; Bool) -&gt; a -&gt; Signal a -&gt; Signal a</span><br><span class="line"></span><br><span class="line">merge : Signal a -&gt; Signal a -&gt; Signal a</span><br><span class="line"></span><br><span class="line">foldp : (a -&gt; s -&gt; s) -&gt; s -&gt; Signal a -&gt; Signal s</span><br></pre></td></tr></table></figure>
+
+<p>建議你先看完<a href="http://elm-lang.org/examples" target="_blank" rel="noopener">signal examples</a> 來對這些 API 有基本的概念之後再繼續，我們將會談到如何將這些基本的導向機制轉為可以執行 HTTP requests的services 以及其他更多的功能。</p>
+<blockquote>
+<p>Note:當你想要寫一個很好的模組化程式時，建議你盡量少用signals ， 而使用普通的 functions與values。假設你未來在使用
+signal 時遇到了困難， 你可以問問自己 “我將如何將這些轉為 functions 與 values?”</p>
+</blockquote>
+<h2 id="Tasks"><a href="#Tasks" class="headerlink" title="Tasks"></a>Tasks</h2><p>Tasks 用來描述一些可能會失敗的非同步操作，像是HTTP requests或是對database寫資料等等，許多有關瀏覽器的api在elm中都稱為tasks</p>
+<ul>
+<li><a href="http://package.elm-lang.org/packages/evancz/elm-http/3.0.0/" target="_blank" rel="noopener">elm-http</a> —  servers 操作</li>
+<li><a href="https://github.com/TheSeamau5/elm-history/" target="_blank" rel="noopener">elm-history</a> — 改變 browser history</li>
+<li><a href="https://github.com/TheSeamau5/elm-storage/" target="_blank" rel="noopener">elm-storage</a> — 本地存儲</li>
+</ul>
+<p>Tasks 類似輕量化的 threads ， 所以你可以有一系列的 tasks 同時運行， 並且在他們任何一個發生中斷時跳過它。</p>
+<p>這個範例將會使用 elm-http package 來建立一個常見的 HTTP requests程式， 像是 <a href="http://elm-lang.org/examples/zip-codes" target="_blank" rel="noopener">zip codes</a> 
+以及 <a href="http://elm-lang.org/examples/flickr" target="_blank" rel="noopener">querying flickr</a> 其中的API比 XMLHttpRequest 還要好用，
+並且比 JavaScript’s promises有更好的錯誤處理。 </p>
+<p>開始之前，請先安裝  evancz/task-tutorial package 並在你的資料夾中執行下面的 command:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">elm-package install evancz&#x2F;task-tutorial -y</span><br><span class="line">elm-package install evancz&#x2F;elm-html -y</span><br><span class="line">elm-package install evancz&#x2F;elm-http -y</span><br><span class="line">elm-package install evancz&#x2F;elm-markdown -y</span><br></pre></td></tr></table></figure>
+
+<p>使用<a href="http://package.elm-lang.org/packages/evancz/task-tutorial/1.0.3/TaskTutorial" target="_blank" rel="noopener"> TaskTutorial</a>，可以幫我們建立一些基本的功能</p>
+<h4 id="Basic-Example"><a href="#Basic-Example" class="headerlink" title="Basic Example"></a>Basic Example</h4><p>下面是一個簡單的 function 可以印出值到 console 中:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">print : a -&gt; Task x ()</span><br></pre></td></tr></table></figure>
+
+<p>我們給予 print function 一個 value， 它將返回一個 Task 它可以在未來被執行，並印出這個value ， 其中的x 用來顯示錯誤發生的類型,
+我們現在先不用關注它，之後會再講到。</p>
+<p>為了真正執行一個 task，我們將它轉向到 <a href="http://elm-lang.org/guide/interop" target="_blank" rel="noopener">port</a> 將ports想像成 是你可以要求elm runtime為你做的一些事。
+在這裡 ，它的意思為執行這個 task.下面的範例中將  print和 ports 放在一起，用來每秒印出現在的時間。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line">import Graphics.Element exposing (show)</span><br><span class="line">import Task exposing (Task)</span><br><span class="line">import TaskTutorial exposing (print)</span><br><span class="line">import Time exposing (second, Time)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- A signal that updates to the current time every second</span><br><span class="line">clock : Signal Time</span><br><span class="line">clock &#x3D;</span><br><span class="line">  Time.every second</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- Turn the clock into a signal of tasks</span><br><span class="line">printTasks : Signal (Task x ())</span><br><span class="line">printTasks &#x3D;</span><br><span class="line">  Signal.map print clock</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- Actually perform all those tasks</span><br><span class="line">port runner : Signal (Task x ())</span><br><span class="line">port runner &#x3D;</span><br><span class="line">  printTasks</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main &#x3D;</span><br><span class="line">  show &quot;Open your browser&#39;s Developer Console.&quot;</span><br></pre></td></tr></table></figure>
+<p>當初始化這個 module時，我們將會發現每秒將會印出現在的時間，printTasks signal 創造了許多 tasks， 但是這並沒有對他自己做任何事
+。就像是在現實生活中，創造 task 不代表task真的有發生。我可以在代辦事項寫上許多的 “買更多牛奶” ，但我仍然需要動身去超市買，否則它將不會自動出現在我的冰箱。</p>
+<p>在Elm中的 tasks 在我們將他轉交給 port 之前他並不會去真正執行。 不像是 JavaScript中的 callback，elm的 runtime 僅僅只是執行了這個 task。</p>
+<p>我們可以傳給port 一個 task 或是一個 signal 帶有許多 tasks。 當你給的是 signal時，所有的 tasks將會被執行，原因是為了避免 overlapping。</p>
+<h4 id="Chaining-Tasks"><a href="#Chaining-Tasks" class="headerlink" title="Chaining Tasks"></a>Chaining Tasks</h4><p>在上面的範例中，我們使用了<a href="http://package.elm-lang.org/packages/evancz/task-tutorial/1.0.3/TaskTutorial#print" target="_blank" rel="noopener">print</a>
+但如果我們想要執行更加複雜的task呢? 參考以下的步驟:</p>
+<p>首先介紹 <a href="http://package.elm-lang.org/packages/evancz/task-tutorial/1.0.3/TaskTutorial#getCurrentTime" target="_blank" rel="noopener">getCurrentTime</a>它可以比 print做更多的事情!</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">getCurrentTime : Task x Time</span><br></pre></td></tr></table></figure>
+
+<p>這是一個單純給你現在時間的 task，當你執行它時， 它會告訴你現在是幾點，現在我們要做的是執行 <code>getCurrentTime</code>並且執行 <code>print</code>
+先讓我們看一下完整版的樣子，在一一去做介紹:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">import Graphics.Element exposing (show)</span><br><span class="line">import Task exposing (Task, andThen)</span><br><span class="line">import TaskTutorial exposing (getCurrentTime, print)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">port runner : Task x ()</span><br><span class="line">port runner &#x3D;</span><br><span class="line">  getCurrentTime &#96;andThen&#96; print</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main &#x3D;</span><br><span class="line">  show &quot;Open the Developer Console of your browser.&quot;</span><br></pre></td></tr></table></figure>
+<p>首先， 注意到其中伊個不常用的反引號，它可以將普通的function轉為 infix operators。 和其他範例相同， (add 3 4) 與 (3 <code>add</code> 4)同樣意思。</p>
+<p>所以(getCurrentTime <code>andThen</code> print) 與 (andThen getCurrentTime print)為相同意思。 當使用反引號時，它讓我們閱讀起來更像是一般英文的用法。</p>
+<p>現在我們知道andThen 是一個普通的 function 並且擁有兩個參數，讓我們看一下它的型別:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">andThen : Task x a -&gt; (a -&gt; Task x b) -&gt; Task x b</span><br></pre></td></tr></table></figure>
+
+<p>第一個參數是我們想要執行的Task，即為getCurrentTime。第二個參數是一個 callback用來建造一個新的 task。
+(在這裡的意思為將現在的時間印出來)</p>
+<p>看一下下面稍為詳細的 task chain將對你有幫助:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">printTime : Task x ()</span><br><span class="line">printTime &#x3D;</span><br><span class="line">  getCurrentTime &#96;andThen&#96; print</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">printTimeVerbose : Task x ()</span><br><span class="line">printTimeVerbose &#x3D;</span><br><span class="line">  getCurrentTime &#96;andThen&#96; \time -&gt; print time</span><br></pre></td></tr></table></figure>
+
+<p>這兩個的意思相同，但是第二個比較明確的指出:我們在等待一個時間，並且將他印出</p>
+<p>其中的andThen function 在使用 tasks 很重要，它讓我們可以創造複雜的Task chains
+接下來的範例它將會很常見</p>
+<h4 id="Communicating-with-Mailboxes"><a href="#Communicating-with-Mailboxes" class="headerlink" title="Communicating with Mailboxes"></a>Communicating with Mailboxes</h4><p>我們現在執行了 tasks但把結果丟掉。但假如我們想從 server取得一些資訊並用到我們的程式中呢?
+我們可以使用 <a href="http://package.elm-lang.org/packages/elm-lang/core/3.0.0/Signal#Mailbox" target="_blank" rel="noopener">Mailbox</a>
+就像是我們在建構 UIs 並希望他回傳值時一樣 ，下面是在 <a href="http://package.elm-lang.org/packages/elm-lang/core/3.0.0/Signal" target="_blank" rel="noopener">Signal module</a>中的一些定義:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">type alias Mailbox a &#x3D;</span><br><span class="line">    &#123; address : Address a</span><br><span class="line">    , signal : Signal a</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">mailbox : a -&gt; Mailbox a</span><br></pre></td></tr></table></figure>
+
+<p> mailbox 擁有兩個鍵值對: (1)  一個address 用來傳遞訊息(2)一個 signal 當我們收到訊息時更新它。當我們建立需要提供一個初始值
+給Signal.</p>
+<p>在這裡的send function 是傳送訊息給 mailbox主要的方式</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">send : Address a -&gt; a -&gt; Task x ()</span><br></pre></td></tr></table></figure>
+
+<p>你提供一個address與 value，當 task 被執行時， value 會出現在相應的 mailbox。
+就像是真實的信箱，接著看一下，下面的範例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">import Graphics.Element exposing (Element, show)</span><br><span class="line">import Task exposing (Task, andThen)</span><br><span class="line">import TaskTutorial exposing (getCurrentTime, print)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main : Signal Element</span><br><span class="line">main &#x3D;</span><br><span class="line">  Signal.map show contentMailbox.signal</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">contentMailbox : Signal.Mailbox String</span><br><span class="line">contentMailbox &#x3D;</span><br><span class="line">  Signal.mailbox &quot;&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">port updateContent : Task x ()</span><br><span class="line">port updateContent &#x3D;</span><br><span class="line">  Signal.send contentMailbox.address &quot;hello!&quot;</span><br></pre></td></tr></table></figure>
+<p>程式一開始只顯是一個空的字串，其為在 mailbox中的初始值，接著我們立刻執行 updateContent task 
+它送出了訊息到contentMailbox。當他抵達時，contentMailbox.signal 的值進行了更新，接著畫面顯示了 “hello!” 。</p>
+<p>現在，我們對andThen 與 Mailbox 有了進一步的了解，接著讓我們看一些更實用的範例!</p>
+<h4 id="HTTP-Tasks"><a href="#HTTP-Tasks" class="headerlink" title="HTTP Tasks"></a>HTTP Tasks</h4><p>我們在web app 使用中最常做的事就是與servers做溝通，  elm-http library 提供了大部分你所需要的函式，
+下面先來介紹有關 Http.getString function</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Http.getString : String -&gt; Task Http.Error String</span><br></pre></td></tr></table></figure>
+
+<p>我們提供一個 URL，它會創造一個 task 用來取得一些資源，最後 x 會是 error type! 這個 task 有可能會產生 Http.Error 或是 succeed且產生一個 String.</p>
+<p>下面的函式用來載入 在e Elm Package Catalog中的README packages</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br></pre></td><td class="code"><pre><span class="line">import Http</span><br><span class="line">import Markdown</span><br><span class="line">import Html exposing (Html)</span><br><span class="line">import Task exposing (Task, andThen)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main : Signal Html</span><br><span class="line">main &#x3D;</span><br><span class="line">  Signal.map Markdown.toHtml readme.signal</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- set up mailbox</span><br><span class="line">--   the signal is piped directly to main</span><br><span class="line">--   the address lets us update the signal</span><br><span class="line">readme : Signal.Mailbox String</span><br><span class="line">readme &#x3D;</span><br><span class="line">  Signal.mailbox &quot;&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- send some markdown to our readme mailbox</span><br><span class="line">report : String -&gt; Task x ()</span><br><span class="line">report markdown &#x3D;</span><br><span class="line">  Signal.send readme.address markdown</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- get the readme *and then* send the result to our mailbox</span><br><span class="line">port fetchReadme : Task Http.Error ()</span><br><span class="line">port fetchReadme &#x3D;</span><br><span class="line">  Http.getString readmeUrl &#96;andThen&#96; report</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">-- the URL of the README.md that we desire</span><br><span class="line">readmeUrl : String</span><br><span class="line">readmeUrl &#x3D;</span><br><span class="line">  &quot;https:&#x2F;&#x2F;raw.githubusercontent.com&#x2F;elm-lang&#x2F;core&#x2F;master&#x2F;README.md&quot;</span><br></pre></td></tr></table></figure>
+
+<p>有趣的部分發生在 fetchReadme port。 我們嘗試從 readmeUrl取得資源，假如成功了，我們將他轉送到 readme mailbox。 假如失敗，則沒有任何訊息會送出。
+假如server 收到了 README 的回覆，我們會看到畫面從空白轉為 elm-lang/core readme中的內容!</p>
+<h4 id="More-Chaining"><a href="#More-Chaining" class="headerlink" title="More Chaining"></a>More Chaining</h4><p>我們已經看到 andThen 用來將兩個 tasks 連接在一起，但我們要如何連接更多的 tasks呢?最終，這將會看起來有點奇怪， 所以你可以使用一些
+indentation 的方式，讓它看起來好一點。 讓我們看下面的範例是如何做到的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line">import Graphics.Element exposing (show)</span><br><span class="line">import Task exposing (Task, andThen, succeed)</span><br><span class="line">import TaskTutorial exposing (getCurrentTime, print)</span><br><span class="line">import Time exposing (Time)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">getDuration : Task x Time</span><br><span class="line">getDuration &#x3D;</span><br><span class="line">  getCurrentTime</span><br><span class="line">    &#96;andThen&#96; \start -&gt; succeed (fibonacci 20)</span><br><span class="line">    &#96;andThen&#96; \fib -&gt; getCurrentTime</span><br><span class="line">    &#96;andThen&#96; \end -&gt; succeed (end - start)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">fibonacci : Int -&gt; Int</span><br><span class="line">fibonacci n &#x3D;</span><br><span class="line">  if n &lt;&#x3D; 2 then</span><br><span class="line">    1</span><br><span class="line">  else</span><br><span class="line">    fibonacci (n-1) + fibonacci (n-2)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">port runner : Task x ()</span><br><span class="line">port runner &#x3D;</span><br><span class="line">  getDuration &#96;andThen&#96; print</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main &#x3D;</span><br><span class="line">  show &quot;Open the Developer Console of your browser.&quot;</span><br></pre></td></tr></table></figure>
+<p>這看起來很自然，取得現在的時間，並且執行 fibonacci function，之後再次取得現在的時間，最後傳回開始與結束時間的差距。</p>
+<p>你可能會有疑問: “why is start in scope two tasks later?” 原因是，這裡的箭頭是一個匿名函式， 所以假如我們把括號放再 getDuration function，它將會看起來像這樣:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">getDuration : Task x Time</span><br><span class="line">getDuration &#x3D;</span><br><span class="line">  getCurrentTime</span><br><span class="line">    &#96;andThen&#96; (\start -&gt; succeed (fibonacci 20)</span><br><span class="line">    &#96;andThen&#96; (\fib -&gt; getCurrentTime</span><br><span class="line">    &#96;andThen&#96; (\end -&gt; succeed (end - start))))</span><br></pre></td></tr></table></figure>
+<p>現在你可以看到我們之前講的 indentation奇怪的地方! 你將會常看到這種鏈式的設計模式， 因為它可以保存許多變數在同一個範圍內，
+讓許多 tasks使用。</p>
+<h4 id="錯誤處理-Error-Handling"><a href="#錯誤處理-Error-Handling" class="headerlink" title="錯誤處理(Error Handling)"></a>錯誤處理(Error Handling)</h4><p>到目前為止我們只在乎成功的task，但如果HTTP request 返回的是一個 404或是一個不能被解析的 JSON 格式呢? 
+我們有兩種主要的方式可以處理這種類型的 tasks所發生的錯誤，第一種是使用 onError function:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">onError : Task x a -&gt; (x -&gt; Task y a) -&gt; Task y a</span><br></pre></td></tr></table></figure>
+
+<p>這看起來跟 andThen很類似，但他只有在發生錯誤時才會被觸發， 所以假如我們想從一個錯誤的 JSON request回復時,我們可以這樣寫:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">import Graphics.Element exposing (show)</span><br><span class="line">import Http</span><br><span class="line">import Json.Decode as Json</span><br><span class="line">import Task exposing (Task, andThen, onError, succeed)</span><br><span class="line">import TaskTutorial exposing (print)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">get : Task Http.Error (List String)</span><br><span class="line">get &#x3D;</span><br><span class="line">  Http.get (Json.list Json.string) &quot;http:&#x2F;&#x2F;example.com&#x2F;hat-list.json&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">safeGet : Task x (List String)</span><br><span class="line">safeGet &#x3D;</span><br><span class="line">  get &#96;onError&#96; (\err -&gt; succeed [])</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">port runner : Task x ()</span><br><span class="line">port runner &#x3D;</span><br><span class="line">  safeGet &#96;andThen&#96; print</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main &#x3D;</span><br><span class="line">  show &quot;Open the Developer Console of your browser.&quot;</span><br></pre></td></tr></table></figure>
+<p>有了這個 get task，雖然我們可能產生 Http.Error的錯誤，但當我們加入了 recovery with onError最後我們仍然可以執行 safeGet task </p>
+<p>當一個 task 永遠會被成功的執行時，  牽制  error type是不可能的， 因為type 可能是任何類型，我們永遠不會知道，因為他從來不會發生，
+這就是為什麼我們要用一個可以是任意型別的 x 於 safeGet中。</p>
+<p>第二種錯誤處理的方式為使用 Task.toMaybe 與 Task.toResult</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">toMaybe : Task x a -&gt; Task y (Maybe a)</span><br><span class="line">toMaybe task &#x3D;</span><br><span class="line">  Task.map Just task &#96;onError&#96; \_ -&gt; succeed Nothing</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">toResult : Task x a -&gt; Task y (Result x a)</span><br><span class="line">toResult task &#x3D;</span><br><span class="line">  Task.map Ok task &#96;onError&#96; \msg -&gt; succeed (Err msg)</span><br></pre></td></tr></table></figure>
+<p>實質上這是把所有錯誤轉為一個success case， 讓我們看下面這個範例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">import Graphics.Element exposing (show)</span><br><span class="line">import Http</span><br><span class="line">import Json.Decode as Json</span><br><span class="line">import Task exposing (Task, andThen, toResult)</span><br><span class="line">import TaskTutorial exposing (print)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">get : Task Http.Error (List String)</span><br><span class="line">get &#x3D;</span><br><span class="line">  Http.get (Json.list Json.string) &quot;http:&#x2F;&#x2F;example.com&#x2F;hat-list.json&quot;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">safeGet : Task x (Result Http.Error (List String))</span><br><span class="line">safeGet &#x3D;</span><br><span class="line">  Task.toResult get</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">port runner : Task x ()</span><br><span class="line">port runner &#x3D;</span><br><span class="line">  safeGet &#96;andThen&#96; print</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">main &#x3D;</span><br><span class="line">  show &quot;Open the Developer Console of your browser.&quot;</span><br></pre></td></tr></table></figure>
+
+<p>使用了 safeGet 我們可以根據 Result type來處理錯誤，當你再處理一些特定的API實，它們將十分有用。</p>
+<h4 id="進階閱讀-Further-Learning"><a href="#進階閱讀-Further-Learning" class="headerlink" title="進階閱讀(Further Learning)"></a>進階閱讀(Further Learning)</h4><p>現在我們對於andThen的鏈式tasks以及錯誤處理有了基本的概念，接著你可以試著閱讀下面這兩個範例:</p>
+<ul>
+<li><a href="http://elm-lang.org/examples/zip-codes" target="_blank" rel="noopener">zip codes</a></li>
+<li><a href="http://elm-lang.org/examples/flickr" target="_blank" rel="noopener">flickr</a></li>
+</ul>
+<h1 id="Interop"><a href="#Interop" class="headerlink" title="Interop"></a>Interop</h1><p>這一章節主要在講如何將 Elm 的程式嵌入到 HTML 中，以及如何與 JavaScript進行溝通。</p>
+<h2 id="HTML-Embedding"><a href="#HTML-Embedding" class="headerlink" title="HTML Embedding"></a>HTML Embedding</h2><p>Elm 可以直接被嵌入一個 <div>標籤中，這讓你可以輕鬆的把 Elm程式與其他 JS project做整合。可以參考下面的範例:</p>
+<p>假設我們有一個簡單的程式 <a href="https://gist.github.com/evancz/8456627#file-stamper-elm" target="_blank" rel="noopener">Stamper.elm</a> 
+讓你在點擊滑鼠時於畫面上留下一個<a href="http://elm-lang.org/examples/stamps" target="_blank" rel="noopener">圖形</a></p>
+<p>使用下面的指令編譯它:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">elm-make Stamper.elm</span><br></pre></td></tr></table></figure>
+<p>將會產生一個名為 elm.js的檔案。 這個 JS 檔案包含了所有嵌入到HTML所需要的要素。</p>
+<p>在EmbeddedElm.html檔案中，我們於<code>&lt;body&gt;</code> 標籤下方增加一個，<code>&lt;script&gt;</code>標籤 並含有以下的程式碼:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; get an empty &lt;div&gt;</span><br><span class="line">var div &#x3D; document.getElementById(&#39;stamper&#39;);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; embed our Elm program in that &lt;div&gt;</span><br><span class="line">Elm.embed(Elm.Stamper, div);</span><br></pre></td></tr></table></figure>
+<p>Elm.embed function 需要兩個參數 :</p>
+<p>1.一個 Elm module，並且所有名字的最前面都包含的Elm字樣，來避免命名空間汙染，所以原來的Stamper模組變為Elm.Stamper。</p>
+<p>2.一個<div>標嵌用來包住我們要嵌入的程式</p>
+<p>這樣就夠了!</p>
+<p>需要注意的是 Window.dimensions 以及 Mouse.position 作用範圍只有在該 <div>中，沒有包含到整個頁面。
+這代表 Stamper中的程式仍然會填滿整個 <div> 並且當你點擊時給予回應。</p>
+<h4 id="另一種嵌入Elm程式的方式-Other-ways-to-embed-Elm"><a href="#另一種嵌入Elm程式的方式-Other-ways-to-embed-Elm" class="headerlink" title="另一種嵌入Elm程式的方式(Other ways to embed Elm"></a>另一種嵌入Elm程式的方式(Other ways to embed Elm</h4><p>下面這個範例將程式嵌入<div>中，但它仍然可以在全螢幕中創造 Elm 元件 ，而另外一個是完全沒有圖形的:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#x2F;&#x2F; fullscreen version of Stamper</span><br><span class="line">Elm.fullscreen(Elm.Stamper);</span><br><span class="line"></span><br><span class="line">&#x2F;&#x2F; Stamper with no graphics</span><br><span class="line">Elm.worker(Elm.Stamper);</span><br></pre></td></tr></table></figure>
+
+<p>在你指定了HTML的輸出檔案後，你也可以讓他自動去產生 HTML</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">elm-make Stamper.elm --output&#x3D;Main.html</span><br></pre></td></tr></table></figure>
+
+<h2 id="Ports"><a href="#Ports" class="headerlink" title="Ports"></a>Ports</h2><p>Ports 是常見的與 JavaScript溝通的方式，讓你可以方便的傳遞訊息，所以你可以在你隨時想要的時候使用 JavaScript。</p>
+<p>你可以參考這個<a href="https://github.com/evancz/elm-html-and-js" target="_blank" rel="noopener">範例</a> 
+與這個<a href="https://gist.github.com/evancz/8521339" target="_blank" rel="noopener">範例</a> 
+在這個文件中將講解你可以使用ports做哪些事情。</p>
+<h4 id="From-JavaScript-to-Elm"><a href="#From-JavaScript-to-Elm" class="headerlink" title="From JavaScript to Elm"></a>From JavaScript to Elm</h4><p>當你想要從JavaScript 送訊息到 Elm， 你可以如下使用incoming port :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">port addUser : Signal (String, UserRecord)</span><br></pre></td></tr></table></figure>
+
+<p>我們有一個signal 在 Elm中，名為 addUser 它將會被 JavaScript的某些程式更新。為了送訊息到這個 port
+我們需要寫一些如下的東西到 JavaScript中:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">myapp.ports.addUser.send([</span><br><span class="line">    &quot;Tom&quot;,</span><br><span class="line">    &#123; age: 32, job: &quot;lumberjack&quot; &#125;</span><br><span class="line">]);</span><br><span class="line"></span><br><span class="line">myapp.ports.addUser.send([</span><br><span class="line">    &quot;Sue&quot;,</span><br><span class="line">    &#123; age: 37, job: &quot;accountant&quot; &#125;</span><br><span class="line">]);</span><br></pre></td></tr></table></figure>
+<p>這將會傳送兩個更新訊息給Elm，並自動轉為值。</p>
+<h2 id="From-Elm-to-JavaScript"><a href="#From-Elm-to-JavaScript" class="headerlink" title="From Elm to JavaScript"></a>From Elm to JavaScript</h2><p>從 Elm 送訊息到 JavaScript，你可以如下定義一個 outgoing port :</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">port requestUser : Signal String</span><br><span class="line">port requestUser &#x3D;</span><br><span class="line">    signalOfUsersWeWantMoreInfoOn</span><br></pre></td></tr></table></figure>
+
+<p>在這個範例，我們使用了一個Elm中的 signal並將它的每個值傳送到 JavaScript。 在 JavaScript 這邊，為了處理這些傳來的訊息我們訂閱了這個 port:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">myapp.ports.requestUser.subscribe(databaseLookup);</span><br><span class="line"></span><br><span class="line">function databaseLookup(user) &#123;</span><br><span class="line">    var userInfo &#x3D; database.lookup(user);</span><br><span class="line">    myapp.ports.addUser.send(user, userInfo);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我們訂閱了 requestUser port 並且會對 database 進行存取， 當我們取得回傳值時，我們將它傳遞到 Elm中，並且使用另一個 port。
+有時你可能會需要對一個  port取消訂閱，如同以下範例:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">myapp.ports.requestUser.unsubscribe(databaseLookup);</span><br></pre></td></tr></table></figure>
+
+<p>你可以查看這兩個範例
+<a href="https://github.com/evancz/elm-html-and-js" target="_blank" rel="noopener">https://github.com/evancz/elm-html-and-js</a>
+<a href="https://gist.github.com/evancz/8521339" target="_blank" rel="noopener">https://gist.github.com/evancz/8521339</a></p>
+<h2 id="Customs-and-Border-Protection"><a href="#Customs-and-Border-Protection" class="headerlink" title="Customs and Border Protection"></a>Customs and Border Protection</h2><p>你需要注意傳送給Ports的值， Elm 是一種靜態語言，所以每個 port 都擁有 border protection用來避免 type errors 
+ Ports 也做了一些資料轉換， 讓你在 Elm 與 JS間有很好的資料結構。</p>
+<p> 可以傳送給 ports 的資料型態是很有彈性的，包含所有有效的 <a href="http://www.json.org/" target="_blank" rel="noopener">JSON</a> 值，與以下所列的 Elm 型態:</p>
+<p>Booleans and Strings – 在 Elm and JS都適用!</p>
+<p>Numbers – Elm ints and floats correspond to JS numbers</p>
+<p>Lists – 對應到 JS arrays</p>
+<p>Arrays – 對應到 JS arrays</p>
+<p>Tuples – 對應到 fixed-length, mixed-type JS arrays</p>
+<p>Records – 對應到 JavaScript objects</p>
+<p>Signals – 對應到 event streams in JS</p>
+<p>Maybes – Nothing and Just 42 correspond to null and 42 in JS</p>
+<p>Json – <a href="http://package.elm-lang.org/packages/elm-lang/core/3.0.0/Json-Encode#Value" target="_blank" rel="noopener">Json.Encode.Value</a> corresponds to arbitrary JSON</p>
+<p>每個轉換都必須是對稱且為正確的資料型態，假如是一個錯誤的型態，它將會立即於 JS 拋出一個錯誤。
+有了border check 之後， Elm 將可以保證你不會遇到任何執行時所產生的 type errors。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/%E5%85%B3%E4%BA%8E%E5%86%99%E5%A5%BD%E4%B8%80%E4%B8%AAreducer%EF%BC%88%E4%B8%8B%EF%BC%89/" rel="prev" title="关于写好一个reducer（下）">
+      <i class="fa fa-chevron-left"></i> 关于写好一个reducer（下）
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/css%E4%B8%AD%E7%9A%84clear%E5%B1%9E%E6%80%A7/" rel="next" title="css中的clear属性">
+      css中的clear属性 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let activeClass = CONFIG.comments.activeClass;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言介紹"><span class="nav-number">1.</span> <span class="nav-text">前言介紹</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#目錄"><span class="nav-number">2.</span> <span class="nav-text">目錄</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#elm-工具"><span class="nav-number">3.</span> <span class="nav-text">elm 工具</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#工具"><span class="nav-number">3.0.0.1.</span> <span class="nav-text">工具</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#elm"><span class="nav-number">3.0.0.2.</span> <span class="nav-text">elm</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#elm-package"><span class="nav-number">3.0.0.3.</span> <span class="nav-text">elm-package</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#elm-make"><span class="nav-number">3.0.0.4.</span> <span class="nav-text">elm-make</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#elm-repl"><span class="nav-number">3.0.0.5.</span> <span class="nav-text">elm-repl</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#elm-reactor"><span class="nav-number">3.0.0.6.</span> <span class="nav-text">elm-reactor</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#編譯器的-elm-syntax"><span class="nav-number">4.</span> <span class="nav-text">編譯器的 elm syntax</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#開始學習Elm"><span class="nav-number">5.</span> <span class="nav-text">開始學習Elm</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#語言核心"><span class="nav-number">6.</span> <span class="nav-text">語言核心</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Values"><span class="nav-number">7.</span> <span class="nav-text">Values</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Functions"><span class="nav-number">8.</span> <span class="nav-text">Functions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#If-Expressions"><span class="nav-number">9.</span> <span class="nav-text">If Expressions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#List"><span class="nav-number">10.</span> <span class="nav-text">List</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Tuples"><span class="nav-number">11.</span> <span class="nav-text">Tuples</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Records"><span class="nav-number">12.</span> <span class="nav-text">Records</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#比較-Records-與-Objects"><span class="nav-number">12.0.0.1.</span> <span class="nav-text">比較 Records 與 Objects</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Model-in-elm"><span class="nav-number">13.</span> <span class="nav-text">Model in elm</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Contracts"><span class="nav-number">13.1.</span> <span class="nav-text">Contracts</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Enumerations-列舉"><span class="nav-number">13.2.</span> <span class="nav-text">Enumerations(列舉)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#State-Machines-狀態機"><span class="nav-number">13.3.</span> <span class="nav-text">State Machines(狀態機)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tagged-Unions"><span class="nav-number">13.4.</span> <span class="nav-text">Tagged Unions</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Banishing-NULL"><span class="nav-number">13.5.</span> <span class="nav-text">Banishing NULL</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Recursive-Data-Structures-遞迴性的資料結構"><span class="nav-number">13.6.</span> <span class="nav-text">Recursive Data Structures(遞迴性的資料結構)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#The-Elm-Architecture"><span class="nav-number">14.</span> <span class="nav-text">The Elm Architecture</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Elm中的基本設計模式概念"><span class="nav-number">14.1.</span> <span class="nav-text">Elm中的基本設計模式概念</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-1-A-Counter"><span class="nav-number">14.2.</span> <span class="nav-text">Example 1: A Counter</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Starting-the-Program"><span class="nav-number">14.3.</span> <span class="nav-text">Starting the Program</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-2-A-Pair-of-Counters"><span class="nav-number">14.4.</span> <span class="nav-text">Example 2: A Pair of Counters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-3-A-Dynamic-List-of-Counters"><span class="nav-number">14.5.</span> <span class="nav-text">Example 3: A Dynamic List of Counters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-4-A-Fancier-List-of-Counters"><span class="nav-number">14.6.</span> <span class="nav-text">Example 4: A Fancier List of Counters</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Big-Lessons-So-Far-到目前為止"><span class="nav-number">14.7.</span> <span class="nav-text">Big Lessons So Far(到目前為止)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-5-Random-GIF-Viewer"><span class="nav-number">14.8.</span> <span class="nav-text">Example 5: Random GIF Viewer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-6-Pair-of-random-GIF-viewers"><span class="nav-number">14.9.</span> <span class="nav-text">Example 6: Pair of random GIF viewers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-7-List-of-random-GIF-viewers"><span class="nav-number">14.10.</span> <span class="nav-text">Example 7: List of random GIF viewers</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Example-8-Animation"><span class="nav-number">14.11.</span> <span class="nav-text">Example 8: Animation</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reactivity"><span class="nav-number">15.</span> <span class="nav-text">Reactivity</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Signals"><span class="nav-number">16.</span> <span class="nav-text">Signals</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Tasks"><span class="nav-number">16.1.</span> <span class="nav-text">Tasks</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Basic-Example"><span class="nav-number">16.1.0.1.</span> <span class="nav-text">Basic Example</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Chaining-Tasks"><span class="nav-number">16.1.0.2.</span> <span class="nav-text">Chaining Tasks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Communicating-with-Mailboxes"><span class="nav-number">16.1.0.3.</span> <span class="nav-text">Communicating with Mailboxes</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#HTTP-Tasks"><span class="nav-number">16.1.0.4.</span> <span class="nav-text">HTTP Tasks</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#More-Chaining"><span class="nav-number">16.1.0.5.</span> <span class="nav-text">More Chaining</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#錯誤處理-Error-Handling"><span class="nav-number">16.1.0.6.</span> <span class="nav-text">錯誤處理(Error Handling)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#進階閱讀-Further-Learning"><span class="nav-number">16.1.0.7.</span> <span class="nav-text">進階閱讀(Further Learning)</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Interop"><span class="nav-number">17.</span> <span class="nav-text">Interop</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#HTML-Embedding"><span class="nav-number">17.1.</span> <span class="nav-text">HTML Embedding</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#另一種嵌入Elm程式的方式-Other-ways-to-embed-Elm"><span class="nav-number">17.1.0.1.</span> <span class="nav-text">另一種嵌入Elm程式的方式(Other ways to embed Elm</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Ports"><span class="nav-number">17.2.</span> <span class="nav-text">Ports</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#From-JavaScript-to-Elm"><span class="nav-number">17.2.0.1.</span> <span class="nav-text">From JavaScript to Elm</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#From-Elm-to-JavaScript"><span class="nav-number">17.3.</span> <span class="nav-text">From Elm to JavaScript</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Customs-and-Border-Protection"><span class="nav-number">17.4.</span> <span class="nav-text">Customs and Border Protection</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">weishijun</p>
+  <div class="site-description" itemprop="description">心得，体会，感悟</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">23</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">weishijun</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> 强力驱动 v4.2.0
+  </div>
+  <span class="post-meta-divider">|</span>
+  <div class="theme-info">主题 – <a href="https://theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.7.2
+  </div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="总访客量">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="总访问量">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
